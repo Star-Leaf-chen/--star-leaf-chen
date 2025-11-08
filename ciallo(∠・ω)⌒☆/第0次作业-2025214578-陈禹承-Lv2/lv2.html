@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lv2</title>
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        /* 最大的蓝色方块水平垂直都居中 */
+        .box1 {
+            width: 600px;
+            height: 320px;
+            background-color: rgb(0, 255, 242);
+
+        }
+
+        /* 中间方块是圆角 */
+        .box2 {
+            width: 300px;
+            height: 100px;
+            background-color: rgb(0, 4, 255);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 16px;
+        }
+
+        /* 左护法 */
+        .left {
+            width: 220px;
+            height: 80px;
+            background-color: rgb(0, 94, 255);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 浮动 */
+            float: left;
+            margin: 0;
+            border: 3px;
+            margin-top: -40px;
+        }
+
+        /* 右护法 */
+        .right {
+            width: 220px;
+            height: 80px;
+            background-color: rgb(0, 94, 255);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 浮动 */
+            float: right;
+            margin: 0;
+            border: 3px;
+            margin-top: -40px;
+        }
+
+        /* 文字 */
+        .DK {
+            line-height: 42px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 大方块 -->
+    <div class="box1" align="center">
+        <h2 align="center">我是个h2，我跑到中间来了</h2>
+        <!-- 第一个小方块 -->
+        <div class="box2">
+            <p align="center">我不仅垂直居中，我的框框还是圆角</p>
+        </div>
+        <div class="DK">上面的圆角框的大小是300*100</div>
+        <div>整个蓝色的大框是<br>600px*320px的</div>
+        <!-- 左护法 -->
+        <div class="left">我是左护法</div>
+        <!-- 右护法 -->
+        <div class="right">我是右护法</div>
+    </div>
+
+</body>
+
+</html>
+<!-- 应该不是很对，但很像（ -->
+<!-- 下次一定 -->
