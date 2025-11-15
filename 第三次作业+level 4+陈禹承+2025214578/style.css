@@ -1,0 +1,13 @@
+span {
+    font-weight: 900;
+    font-size: larger;
+    background-size: 0% 1px;
+    background-image: linear-gradient(to right, yellowgreen, rgb(135, 163, 235));
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 2s;
+}
+
+span:hover {
+    background-size: 100% 1px;
+}
