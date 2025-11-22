@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>level 1 任务</title>
+</head>
+
+<body>
+
+
+
+
+  <script>
+    // 创建一个学生信息表单
+    // 1.法1：
+    let obj1 = {
+      name: "Li Hua",
+      age: 16,
+      gender: 'male',
+    };
+    function copy1(object) {
+      let newObj = {};
+      for (let key in object) {
+        newObj[key] = object[key];
+      }
+      return newObj;
+    }
+    let arr = [];
+
+    arr.push(copy1(obj1))
+    for (let i = 0; i < 2; i++) {
+      arr.push(copy1(obj1))
+    };
+    console.table(arr);
+    // 2.法2：
+    let obj2 = {
+      name: "Li Hua",
+      age: 16,
+      gender: 'male',
+    };
+    arr2 = [];
+    for (let i = 0; i < 3; i++) {
+      arr2.push({ ...obj2 })
+    };
+    console.table(arr2);
+    // 3.法3：
+    let obj3 = {
+      name: "Li Hua",
+      age: 16,
+      gender: 'male',
+    };
+    arr3 = [];
+    for (let i = 0; i < 3; i++) {
+      arr3.push(Object.assign({}, obj3))
+    };
+    console.table(arr3);
+
+  </script>
+</body>
+
+</html>
