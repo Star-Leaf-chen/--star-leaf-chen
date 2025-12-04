@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>level 0 任务 0</title>
+</head>
+
+<body>
+  <script>
+    const preson = {
+      name: "小明",
+      age: 18,
+      address: {
+        city: 'ChongQing',
+        area: 'RedRock',
+      },
+      title: [
+        'student', { year: 2025, title: 'GoodStudent', }]
+    }
+    // 我的代码(一行)
+    const { name, title: [title1, { year, title: title2 }], address: { city, area: mountain }, } = preson;
+    console.log(name);
+    console.log(year);
+    console.log(city);
+    console.log(mountain);
+    console.log(title1);
+    console.log(title2);
+
+
+
+
+  </script>
+</body>
+
+</html>
