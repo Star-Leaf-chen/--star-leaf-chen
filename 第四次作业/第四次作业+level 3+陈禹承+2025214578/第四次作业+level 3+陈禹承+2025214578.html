@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>level 3</title>
+</head>
+
+<body>
+
+
+
+  <script>
+    // 法1:用递归
+    const oldObj = {
+      age: 18,
+      uname: "haoren",
+      Number: [1, 2, 3, 4, 5, 6],
+      Address: { hobby: '乒乓球', job: '打灰' }
+    }
+    const newObj = {};
+    function deepCopy(newObj, oldObj) {
+      for (let k in oldObj) {
+        if (oldObj[k] instanceof Array) {
+          newObj[k] = [];
+          deepCopy(newObj[k], oldObj[k]);
+        }
+        else if (oldObj[k] instanceof Object) {
+          newObj[k] = {};
+          deepCopy(newObj[k], oldObj[k]);
+        }
+        else {
+          newObj[k] = oldObj[k];
+        }
+      }
+
+    }
+    deepCopy(newObj, oldObj);
+    console.log(newObj);
+    // 法2 JSON.stringify()
+    const newObj2 = JSON.parse(JSON.stringify(oldObj));
+    console.log(newObj2);
+
+
+
+
+  </script>
+</body>
+
+</html>
