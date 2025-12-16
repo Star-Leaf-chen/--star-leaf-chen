@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>level 1</title>
+  <link rel="stylesheet" href=".css">
+</head>
+
+<body>
+  <div>
+    <b>请选择您的爱好</b>
+    <br />
+  </div>
+  <div id="divlist">
+    <input type="checkbox" class="cks" value="内卷">内卷
+    <input type="checkbox" class="cks" value="疯狂内卷">疯狂内卷
+    <input type="checkbox" class="cks" value="拼命内卷">拼命内卷
+    <input type="checkbox" class="cks" value="使劲内卷">使劲内卷
+    <br />
+    <input type="button" class="checkAll" value="全选">
+    <input type="button" class="checkNotAll" value="全不选">
+    <input type="button" class="reverse" value="反选">
+  </div>
+  <script>
+    const cks = document.querySelectorAll('.cks');
+    const checkAll = document.querySelector('.checkAll');
+    const checkNotAll = document.querySelector('.checkNotAll');
+    const reverse = document.querySelector('.reverse');
+    checkAll.addEventListener('click', function () {
+      for (let i = 0; i < cks.length; i++) {
+        cks[i].checked = true;
+      }
+    })
+    checkNotAll.addEventListener('click', function () {
+      for (let i = 0; i < cks.length; i++) {
+        cks[i].checked = false;
+      }
+    })
+    reverse.addEventListener('click', function () {
+      for (let i = 0; i < cks.length; i++) {
+        if (cks[i].checked = false) {
+          cks[i].checked = true;
+        }
+        else { cks[i].checked = false; }
+      }
+    })
+  </script>
+</body>
+
+</html>
