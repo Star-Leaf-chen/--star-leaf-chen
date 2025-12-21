@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>level 2</title>
+  <style>
+    div {
+      width: 600px;
+      margin: 100px auto;
+      font-size: 15px;
+      line-height: 1.6;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div></div>
+  <script>
+    //法1：回调函数（有点长，省略了[doge]）  
+    // 法2：Promise
+    const Array = ['七', '律', '·', '长', '征', '\n',
+      '朝', '代', ':', '近', '现', '代', '|', '作', '者', ':', '毛', '泽', '东', '\n',
+      '红', '军', '不', '怕', '远', '征', '难', ',', '万', '水',
+      '千', '山', '只', '等', '闲', ',', '\n',
+      '五', '岭', '逶', '迤', '腾', '细', '浪', ',', '乌', '蒙', '磅', '礴', '走', '泥', '丸', ',', '\n',
+      '金', '沙', '水', '拍', '云', '崖', '暖', ',', '大', '渡', '桥', '横', '铁', '索', '寒', '。', '\n',
+      '更', '喜', '岷', '山', '千', '里', '雪', ',', '三', '军', '过', '后', '尽', '开', '颜', '。',
+    ];
+    const div = document.querySelector('div');
+    const p = document.createElement('p');
+    div.appendChild(p);
+    let promise = Promise.resolve();
+    Array.forEach((char, index) => {
+      promise = promise.then(() => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            if (char === '\n') {
+              p.innerHTML += '<br>';
+            }
+            else {
+              p.innerHTML += char;
+            }
+            resolve();
+          }, 60);
+        });
+      });
+    });
+
+  </script>
+</body>
+
+</html>
