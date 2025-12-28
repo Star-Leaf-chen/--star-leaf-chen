@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>level 2</title>
+  <style>
+
+  </style>
+</head>
+
+<body>
+
+  <script>
+    const config = {
+      method: "post",
+      headers: {
+        Authorization: "token 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",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "MyProject-" + Date.now(),
+        description: "第八次作业 level 2",
+        private: false
+      })
+    };
+    fetch("https://api.github.com/user/repos", config)
+      .then(res => {
+        console.log('Response status:', res.status);
+        return res.json();
+      })
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error))
+
+
+
+
+
+
+
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>level 1</title>
+  <style>
+    .box {
+      width: 400px;
+      height: auto;
+      background: linear-gradient(to right, #87CEEB, #E0F7FA);
+      border: 2px solid gray;
+      margin: 20px auto;
+      padding: 20px;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box"></div>
+  <script>
+    const box = document.querySelector('.box');
+    const h1 = document.createElement('h1');
+
+    const h2 = document.createElement('h2');
+    const config = {
+      method: "get",
+    }
+    // 重庆市天气API请求
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=Chongqing&appid=7ede90412af8775020a23b0f9782d4d3&units=metric&lang=zh_cn`, config)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        box.appendChild(h1);
+        h1.innerText = `城市：${data.name}`;
+//少量使用AI（trae）,CodeBuddy开始收费了QAQ 鹅厂钛坏啦
+        const h2Weather = document.createElement('h2');
+        h2Weather.innerText = `天气：${data.weather[0].description}`;
+        box.appendChild(h2Weather);
+
+        const h2Temp = document.createElement('h2');
+        h2Temp.innerText = `温度：${data.main.temp}°C`;
+        box.appendChild(h2Temp);
+
+        const h2Humidity = document.createElement('h2');
+        h2Humidity.innerText = `湿度：${data.main.humidity}%`;
+        box.appendChild(h2Humidity);
+
+        const h2Wind = document.createElement('h2');
+        h2Wind.innerText = `风速：${data.wind.speed}米/秒`;
+        box.appendChild(h2Wind);
+      })</script>
+</body>
+
+</html>
