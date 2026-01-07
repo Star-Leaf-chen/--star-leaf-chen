@@ -4,20 +4,64 @@
 
 }
 
+textarea {
+  resize: none;
+  font-size: 16px;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-image: url(QQ图片20260107195332.jpeg);
+  z-index: -1;
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+
+}
+
+body .bodyBOx {
+  position: relative;
+  z-index: 1;
+  min-height: 850px;
+  width: 65%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-bottom: 50px;
+  border-radius: 21px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-size: 300% 300%;
+  background: linear-gradient(to right, rgba(255, 235, 243, 0.9), rgba(255, 235, 243, 0.8), rgb(255, 255, 255, 0.2));
+}
+
+
+
 .item {
   display: flex;
   align-items: center;
   gap: 15px;
   height: 100px;
   width: 60%;
-  background-color: skyblue;
+  background-color: rgba(255, 228, 239, 0.8);
   border-radius: 10px;
   margin-top: 10px;
   margin-left: 1%;
   padding: 0 15px;
   gap: 15px;
   box-sizing: border-box;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   transition: all 0.4s;
+}
+
+.topText {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 
@@ -28,11 +72,10 @@
 
 .item .avatar {
   flex-shrink: 0;
-  display: inline-block;
+  display: flex;
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  margin-top: 10px;
   background-image: url('二次元.png');
   background-size: cover;
   background-position: center;
@@ -49,22 +92,23 @@
 
 .info {
   flex: 1;
-  display: inline-block;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .name {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-top: 15px;
 }
 
 .text {
   font-size: 16px;
-  margin-top: 12px;
+  flex: 1;
 }
 
 .list {
-
   gap: 10px;
 }
 
@@ -79,15 +123,18 @@
 #bt {
   width: 60px;
   height: 50px;
-  background: linear-gradient(to bottom, skyblue, rgb(0, 85, 128));
+  background: linear-gradient(to bottom, rgb(255, 249, 249), rgb(241, 207, 207));
   border: none;
   cursor: pointer;
   font-size: 16px;
+  border-radius: 0 10px 10px 0;
+  transition: all 0.3s;
 }
+
 .deleteButton {
   position: fixed;
   padding: 8px 15px;
-  background-color: white;
+  background-color: rgb(254, 241, 241);
   color: grey;
   border: none;
   border-radius: 5px;
@@ -95,6 +142,41 @@
   z-index: 1000;
   transition: all 0.2s;
 }
+
 .deleteButton:hover {
   background-color: rgb(230, 230, 230);
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.list .item:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.list .item .avatar {
+  border: 2px solid #007BFF;
+}
+
+.list .item .name {
+  color: #333333;
+}
+
+.list .item .text {
+  color: #666666;
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -9,22 +9,24 @@
 </head>
 
 <body>
-
-  <!-- 先写框架 -->
-  <div class="wrapper">
-    <i class="avatar"></i>
-    <textarea name="" id="tx" placeholder="发一条友善的评论"></textarea>
-    <button id="bt">发布</button>
-  </div>
-  <!-- 用户的评论 -->
-  <div class="list">
-    <!-- 评论框架默认隐藏 -->
-    <div class="item" style="display: none" ;>
+  <div class="bodyBOx">
+    <div class="topText">评论区</div>
+    <!-- 先写框架 -->
+    <div class="wrapper">
       <i class="avatar"></i>
-      <div class="info">
-        <p class="name">一个帅气的名字</p>
-        <p class="text">内容</p>
-        <p class="time"></p>
+      <textarea name="" id="tx" placeholder="发一条友善的评论"></textarea>
+      <button id="bt">发布</button>
+    </div>
+    <!-- 用户的评论 -->
+    <div class="list">
+      <!-- 评论框架默认隐藏 -->
+      <div class="item" style="display: none" ;>
+        <i class="avatar"></i>
+        <div class="info">
+          <p class="name">ciallo(∠・ω)⌒☆</p>
+          <div class="text">内容</div>
+          <p class="time"></p>
+        </div>
       </div>
     </div>
   </div>
@@ -32,23 +34,37 @@
     const list = document.querySelector('.list');
     const bt = document.querySelector('#bt');
     const tx = document.querySelector('#tx');
-    bt.addEventListener('click', function () {
+
+    function publishComment() {
       if (tx.value.trim() === '') {
         alert('评论不能为空');
         return;
       }
       const item = document.querySelector('.item');
       const newItem = item.cloneNode(true);
-      newItem.style.display = 'block';
+      newItem.style.display = 'flex';
       const text = newItem.querySelector('.text');
       text.innerHTML = tx.value;
       list.appendChild(newItem);
-      alert('发布成功');
-      tx.value = ' ';
+      tx.value = '';
+    }
+
+    bt.addEventListener('click', publishComment);
+
+    // 回车键发布评论
+    tx.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        publishComment();
+      }
     });
-    // 删除部分
+
+    // 右键菜单功能
     let deleteButton = null;
+
+    // 监听评论列表的右键事件
     list.addEventListener('contextmenu', function (e) {
+      // 检查是否点击在评论项上
       const item = e.target.closest('.item');
       if (item && item.style.display !== 'none') {
         e.preventDefault();
