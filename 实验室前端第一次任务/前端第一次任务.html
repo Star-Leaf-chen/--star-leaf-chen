@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端第一次任务</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="图片/logo1.png" type="image/png">
+</head>
+
+<body>
+  <header>
+    <div class="header-left">
+      <img src="图片/logo1.png" alt="">
+      <p>就业智能体-v0.3</p>
+    </div>
+    <div class="header-center">
+      <div class="search-box">
+        <input type="text" placeholder="搜索...">
+        <button>🔍</button>
+      </div>
+    </div>
+    <div class="header-right">
+      <nav class="header-nav">
+        <div>首页</div>
+        <div>服务</div>
+        <div>社区</div>
+        <div>关于</div>
+      </nav>
+      <div class="header-icons">
+        <div class="icon-btn" title="通知">🔔</div>
+        <div class="icon-btn" title="设置">⚙️</div>
+        <div class="user-info">
+          <img src="图片/logo1.png" alt="" class="user-avatar">
+          <span>用户</span>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <aside>
+      <nav>
+        <div>升学</div>
+        <div>考公</div>
+        <div>考编</div>
+        <div>企业就业</div>
+        <div>自由职业</div>
+      </nav>
+    </aside>
+    <div class="rightBox">
+      <div class="topNav">
+        <div>出国</div>
+        <div>考研</div>
+        <div>保研</div>
+      </div>
+      <div class="carousel">
+        <div class="carousel-container">
+          <div class="carousel-track">
+            <img src="图片/轮播图1.png" alt="" class="carousel-slide side-slide">
+            <img src="图片/轮播图1.png" alt="" class="carousel-slide middle-slide">
+            <img src="图片/轮播图1.png" alt="" class="carousel-slide side-slide">
+          </div>
+        </div>
+      </div>
+      <div class="content">
+        <div>
+          <div>本科</div>
+          <div>硕士</div>
+          <div>博士</div>
+          <div>申请准备</div>
+          <div>其他</div>
+        </div>
+        <div>
+        </div>
+      </div>
+      <div class="loading">
+        <div>
+          <div>加载中..</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>版权信息</h3>
+        <p>© 2026 就业智能体. 保留所有权利.</p>
+      </div>
+      <div class="footer-section">
+        <h3>联系方式</h3>
+        <p>📧 contact@example.com</p>
+        <p>📞 114-514</p>
+        <p>📍 重庆南山</p>
+      </div>
+      <div class="footer-section">
+        <h3>友情链接</h3>
+        <a href="#">教育部</a>
+        <a href="#">人社部</a>
+        <a href="#">智联招聘</a>
+        <a href="#">前程无忧</a>
+      </div>
+      <div class="footer-section">
+        <h3>关注我们</h3>
+        <div class="social-icons">
+          <span class="social-icon" title="微信">💬</span>
+          <span class="social-icon" title="微博">📱</span>
+          <span class="social-icon" title="QQ">🐧</span>
+          <span class="social-icon" title="抖音">🎵</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <div class="rightBottomBox">智能分析</div>
+
+</body>
+<script>
+  const middleSlide = document.querySelector('.middle-slide');
+  const sideSlides = document.querySelectorAll('.side-slide');
+  const images = ['图片/轮播图1.png', '图片/轮播图2.png', '图片/轮播图3.png'];
+  let currentIndex = 0;
+
+  function updateCarousel() {
+    middleSlide.src = images[currentIndex];
+    sideSlides[0].src = images[(currentIndex - 1 + images.length) % images.length];
+    sideSlides[1].src = images[(currentIndex + 1) % images.length];
+  }
+
+  function nextSlide() {
+    currentIndex = (currentIndex + 1) % images.length;
+    updateCarousel();
+  }
+
+  setInterval(nextSlide, 3000);
+</script>
+
+</html>
