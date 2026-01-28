@@ -1,20 +1,47 @@
-const middleSlide = document.querySelector('.middle-slide');
-const sideSlides = document.querySelectorAll('.side-slide');
-const images = ['图片/轮播图1.png', '图片/轮播图2.png', '图片/轮播图3.png'];
-let currentIndex = 0;
+// 等待DOM加载完成
+document.addEventListener('DOMContentLoaded', function () {
+  const slides = document.querySelectorAll('.carousel-slide');
+  let currentIndex = 1; // 中间图片索引
 
-function updateCarousel() {
-  middleSlide.src = images[currentIndex];
-  sideSlides[0].src = images[(currentIndex - 1 + images.length) % images.length];
-  sideSlides[1].src = images[(currentIndex + 1) % images.length];
-}
+  function rotateCarousel() {
+    // 移除所有类
+    slides.forEach(slide => {
+      slide.classList.remove('active', 'prev', 'next');
+    });
 
-function nextSlide() {
-  currentIndex = (currentIndex + 1) % images.length;
-  updateCarousel();
-}
+    // 设置类名：当前active，左边prev，右边next
+    const prevIndex = (currentIndex - 1 + 3) % 3;
+    const nextIndex = (currentIndex + 1 + 3) % 3;
 
-setInterval(nextSlide, 3000);
+    slides[prevIndex].classList.add('prev');
+    slides[currentIndex].classList.add('active');
+    slides[nextIndex].classList.add('next');
+  }
+
+  // 自动旋转
+  setInterval(() => {
+    currentIndex = (currentIndex + 1) % 3;
+    rotateCarousel();
+  }, 3000);
+
+  // 箭头点击事件
+  const leftArrow = document.querySelector('.carousel-arrow-left');
+  const rightArrow = document.querySelector('.carousel-arrow-right');
+
+  if (leftArrow) {
+    leftArrow.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % 3;
+      rotateCarousel();
+    });
+  }
+
+  if (rightArrow) {
+    rightArrow.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + 3) % 3;
+      rotateCarousel();
+    });
+  }
+});
 
 // 侧边栏导航点击后一直高亮和切换功能
 const navItems = document.querySelectorAll('.container-nav');

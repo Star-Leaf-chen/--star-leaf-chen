@@ -306,7 +306,7 @@ footer {
 .carousel {
   margin-top: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -318,37 +318,81 @@ footer {
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  padding: 0 20px;
+  position: relative;
+}
+
+.carousel-arrow {
+  font-size: 15px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.4);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.carousel-arrow-left {
+  left: 20px;
+}
+
+.carousel-arrow-right {
+  right: 20px;
+}
+
+.carousel:hover .carousel-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.carousel-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .carousel-track {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100%;
+  height: 230px;
+  overflow: hidden;
+  position: relative;
 }
 
 .carousel-slide {
-  height: 80%;
+  position: absolute;
+  height: 200px;
+  width: 655px;
   object-fit: cover;
   border-radius: 8px;
-  transition: all 0.5s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.5s ease;
 }
 
-.side-slide {
-  width: 30%;
+.carousel-slide.active {
+  transform: translateX(0) scale(1.2);
+  z-index: 2;
+}
+
+.carousel-slide.prev {
+  transform: translateX(-350px) scale(1);
   opacity: 0.7;
-  filter: grayscale(30%);
+  z-index: 1;
 }
 
-.middle-slide {
-  width: 32%;
-  opacity: 1;
-  filter: grayscale(0%);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  transform: scale(1.5);
-  border-radius: 5px;
+.carousel-slide.next {
+  transform: translateX(350px) scale(1);
+  opacity: 0.7;
   z-index: 1;
 }
 
