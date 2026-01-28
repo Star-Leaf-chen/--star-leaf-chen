@@ -126,20 +126,55 @@ header {
   font-size: 14px;
 }
 
+/* welcome的文字上下左右都居中 */
+.welcome {
+  text-align: center;
+  margin: 20px 0;
+  color: rgba(0, 0, 0, 0.644);
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.welcome-title {
+  color: skyblue;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.welcome-subtext {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
 aside {
   display: flex;
   background-color: #f0f0f0;
   flex-direction: column;
-  gap: 10px;
 }
 
-aside div {
+.container {
+  display: grid;
+  grid-template-columns: 1fr 7fr;
+  gap: 20px;
+}
+
+.container-nav {
   padding: 8px 16px;
   text-align: center;
-  transition: all 0.2s;
 }
 
-aside div:hover {
+.container-nav:hover {
+  background-color: rgba(177, 238, 255, 0.201);
+  color: rgb(0, 140, 255);
+}
+
+.container-nav-active {
   background-color: rgba(177, 238, 255, 0.201);
   border-left: 2px solid rgb(24, 144, 255);
   color: rgb(0, 140, 255);
@@ -213,22 +248,15 @@ footer {
 }
 
 .rightBox {
-  display: grid;
-  grid-template-rows: 1fr 3fr 3fr 3fr;
+  display: flex;
+  flex-direction: column;
   background-color: white;
-  padding: 20px;
-}
-
-.container {
-  display: grid;
-  grid-template-columns: 1fr 7fr;
-  gap: 20px;
 }
 
 .topNav {
-  display: flex;
+  position: relative;
+  display: none;
   height: 40px;
-  justify-content: start;
   background-color: white;
   color: black;
   padding: 10px;
@@ -236,19 +264,42 @@ footer {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.topNav div {
+.topNav.show {
+  display: block;
+}
+
+.topNav-nav-item {
+  display: none;
+  width: 100%;
+}
+
+
+
+.topNav-nav-item.active {
+  display: flex;
+}
+
+.topNav-item-active {
+  background-color: rgb(25, 144, 255) !important;
+  color: rgba(255, 255, 255, 0.846) !important;
+}
+
+.topNav-item {
   background-color: #f0f0f0;
   text-align: center;
   margin-right: 20px;
   padding: 8px 16px;
   color: black;
-  transition: all 0.3s;
   border-radius: 18.5px;
 }
 
-.topNav div:hover {
-  background-color: deepskyblue;
-  color: white;
+
+
+.topNav div div:hover {
+  background-color: rgba(0, 191, 255, 0.13);
+  color: deepskyblue;
+  border: 1px solid deepskyblue;
+  padding: 7px 15px;
   cursor: pointer;
 }
 
@@ -302,89 +353,122 @@ footer {
 }
 
 .content {
-  display: grid;
+  display: none;
   grid-template-columns: 1fr 5fr;
   gap: 20px;
   margin-top: 20px;
   margin-bottom: 20px;
 }
 
-.content>div:first-child {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 195px;
-  overflow-y: auto;
-  padding-right: 5px;
-
+.content.active {
+  display: grid;
 }
 
-.content>div:first-child::-webkit-scrollbar {
+/* 显示的div */
+.content>div.show {
+  display: block;
+  background-color: white;
+  text-align: center;
+  padding: 10px;
+}
+
+
+/* 所有item默认隐藏 */
+.content>.content-item {
+  display: none !important;
+}
+
+/* 显示的item - 移除!important,让JavaScript的show类生效 */
+.content>.content-item.show {
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 180.6px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* 滚动条样式 */
+.content>.content-item.show::-webkit-scrollbar {
   width: 8px;
 }
 
-.content>div:first-child::-webkit-scrollbar-track {
+
+.content>.content-item.show::-webkit-scrollbar-track {
   background: #e0e0e0;
   border-radius: 4px;
 }
 
-.content>div:first-child::-webkit-scrollbar-thumb {
+.content>.content-item.show::-webkit-scrollbar-thumb {
   background: rgb(24, 144, 255);
   border-radius: 4px;
 }
 
-.content>div:first-child::-webkit-scrollbar-thumb:hover {
+
+.content>.content-item.show::-webkit-scrollbar-thumb:hover {
   background: rgb(0, 100, 255);
 }
 
-.content>div:first-child div {
+.content-item.show div {
   background-color: #f0f0f0;
   color: black;
-  padding: 8px 16px;
+  padding: 7.2px 15.2px;
   border-radius: 5px;
   text-align: center;
-  transition: all 0.3s;
 }
 
-.content>div:first-child div:hover {
-  background-color: deepskyblue;
-  color: white;
+.content-item.show div:hover {
+  background-color: rgba(253, 253, 253, 0.866);
+  border: 0.8px solid rgb(24, 144, 255);
+  color: rgb(24, 144, 255);
   cursor: pointer;
 }
 
-.content>div:last-child {
-  background-color: #f0f0f0;
-  text-align: center;
-  padding: 20px;
-  background: url(图片/思维导图.png);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.content-item-active {
+  background-color: rgb(24, 144, 255) !important;
+  color: white !important;
 }
 
 .loading {
+  display: none;
   text-align: center;
-  background-color: white;
+  background-color: #f0f0f0;
   padding: 20px;
   font-size: 18px;
   color: rgb(0, 140, 255);
-  display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
-  border: 21px solid #e0e0e0;
   border-radius: 5px;
-  border-color: #f0f0f0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-height: 25vh;
 }
 
-.loading>div {
+.loading.show {
   display: flex;
+}
+
+
+
+.loading>div {
+  display: none;
+  background-color: white;
+  padding-top: 105px;
+  padding-bottom: 105px;
+  padding-left: 45%;
+  padding-right: 45%;
+  border-radius: 5px;
   align-items: center;
   text-align: center;
   gap: 15px;
+}
+
+.loading.show>div {
+  display: none;
+}
+
+.loading.active>div {
+  display: flex;
 }
 
 .loading>div::before {
@@ -410,10 +494,11 @@ footer {
 
 .rightBottomBox {
   position: fixed;
+  color: white;
   bottom: 20px;
   right: 20px;
-  background-color: deepskyblue;
-  padding: 10px;
+  background-color: rgba(0, 119, 255, 0.959);
+  padding: 12px;
   text-align: center;
   border-radius: 5px;
 }
