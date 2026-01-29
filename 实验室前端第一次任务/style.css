@@ -128,12 +128,12 @@ header {
 
 /* welcome的文字上下左右都居中 */
 .welcome {
+  display: flex;
   text-align: center;
   margin: 20px 0;
   color: rgba(0, 0, 0, 0.644);
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -398,14 +398,73 @@ footer {
 
 .content {
   display: none;
-  grid-template-columns: 1fr 5fr;
+
+}
+
+.content.active {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
   gap: 20px;
   margin-top: 20px;
   margin-bottom: 20px;
 }
 
-.content.active {
-  display: grid;
+.content-img {
+  display: none !important;
+  margin-left: 335px;
+  width: 303%;
+  height: auto;
+  border-radius: 8px;
+  height: 180.6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.content-img-active {
+  display: flex !important;
+}
+
+.content-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.content-item-img {
+  display: none !important;
+
+}
+
+.content-item-img-active {
+  display: flex !important;
+  width: 100%;
+  border-radius: 8px;
+  height: 180.6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.content-item-img img {
+  width: 100%;
+  height: 111%;
+  object-fit: cover;
+}
+
+.content-item-img-item {
+  display: none !important;
+}
+
+.content-item-img-item-active {
+  display: flex !important;
+  width: 100%;
+  border-radius: 8px;
+  height: 180.6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.content-item-img-item img {
+  width: 100%;
+  height: 111%;
+  object-fit: cover;
 }
 
 /* 显示的div */
