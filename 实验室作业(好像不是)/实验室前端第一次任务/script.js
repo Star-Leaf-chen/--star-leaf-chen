@@ -52,6 +52,7 @@ const welcome = document.querySelector('.welcome');
 const allContentImgs = document.querySelectorAll('.content-img');
 const allTopNavItems = document.querySelectorAll('.topNav-item');
 const allContentItemDivs = document.querySelectorAll('.content-item');
+const allContentItemImgs = document.querySelectorAll('.content-item-img');
 // 侧边栏点击
 navItems.forEach((item, index) => {
   item.addEventListener('click', function () {
@@ -70,6 +71,7 @@ navItems.forEach((item, index) => {
     topNavItems.forEach(nav => nav.classList.remove('active', 'topNav-item-active'));
     contentDivs.forEach(content => content.classList.remove('active'));
     allContentItemDivs.forEach(div => div.classList.remove('show'));
+    allContentItemImgs.forEach(img => img.classList.remove('content-item-img-active'));
     // 清除所有topNav-item的选中状态
     allTopNavItems.forEach(nav => nav.classList.remove('topNav-item-active'));
 
@@ -90,9 +92,7 @@ navItems.forEach((item, index) => {
 
 // topNav-item点击事件
 //  const allTopNavItems = document.querySelectorAll('.topNav-item');
-const allContentItemImgs = document.querySelectorAll('.content-item-img');
 const allContentItemImgItems = document.querySelectorAll('.content-item-img-item');
-
 allTopNavItems.forEach((item) => {
   item.addEventListener('click', function (e) {
     e.stopPropagation();
@@ -255,6 +255,11 @@ document.addEventListener('click', function (e) {
       nextElement = nextElement.nextElementSibling;
     }
   }
+});
+
+const rightBottomBox = document.querySelector('.rightBottomBox');
+rightBottomBox.addEventListener('click', function () {
+  alert('想什么呢，没有！');
 });
 
 
