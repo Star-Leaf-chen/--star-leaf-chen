@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="tab-container">
+    <div class="tab-menu">
+      <a href="#tab1">标签1</a>
+      <a href="#tab2">标签2</a>
+      <a href="#tab3">标签3</a>
+    </div>
+    <div class="tab-content">
+      <div id="tab1" class="tab-pane">内容1</div>
+      <div id="tab2" class="tab-pane">内容2</div>
+      <div id="tab3" class="tab-pane">内容3</div>
+    </div>
+  </div>
+
+  <style>
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane:target {
+      display: block;
+    }
+  </style>
+</body>
+
+</html>
