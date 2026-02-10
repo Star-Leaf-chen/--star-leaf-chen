@@ -1,0 +1,23 @@
+{
+  "html.autoClosingTags": true,
+  "html.format.enable": true,
+  "html.suggest.html5": true,
+  "css.validate": true,
+  "css.lint.unknownAtRules": "ignore",
+  "css.format.enable": true,
+  "javascript.suggestionActions.enabled": true,
+  "javascript.validate.enable": true,
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
+  "editor.suggestSelection": "first",
+  "editor.wordBasedSuggestions": "matchingDocuments",
+  "files.associations": {
+    "*.js": "javascript",
+    "*.html": "html",
+    "*.css": "css"
+},
+"liveServer.settings.port": 5501
+}

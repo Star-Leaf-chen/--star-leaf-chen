@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>网易云音乐</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="album.css">
+  <link rel="stylesheet" href="now-playing-bar.css">
   <link rel="icon" href="图片/logo.webp" type="image/x-icon">
 </head>
 
@@ -34,11 +36,15 @@
     </aside>
     <article>
       <header>
-        <button class="header-button">
+        <button class="header-button" id="backButton">
           < </button>
             <div class="header-input">
               <div><img src="图片/搜索.png" alt=""></div>
-              <input type="text" placeholder="   搜索音乐、歌词、歌手">
+              <input type="text" placeholder="">
+            </div>
+            <div class="search-suggestion">
+              <div class="hot-list-title">热搜榜</div>
+              <div class="hot-list"></div>
             </div>
             <div class="header-icon"><img src="图片/听歌识曲.png" alt=""></div>
             <div class="user">
@@ -175,104 +181,104 @@
           <div class="release-scroll-container">
             <div class="release-scroll-wrapper" id="scrollWrapper2">
               <div class="release-scroll">
-                <!-- 第一个横向滚动列表 -->
-                <div class="release-card">
+                <!-- 推荐歌单第一个横向列表 -->
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
-                  <img src="图片/推荐歌曲图31.jpg" alt="歌曲1">
+                  <img src="图片/推荐歌曲图31.jpg" alt="歌单1">
                   <div class="release-info">
                     <div class="play-count">759.16万</div>
-                    <h3 class="release-title">歌单1</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
-                  <img src="图片/推荐歌曲图32.jpg" alt="歌曲2">
+                  <img src="图片/推荐歌曲图32.jpg" alt="歌单2">
                   <div class="release-info">
                     <div class="play-count">178.5万</div>
-                    <h3 class="release-title">歌单2</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
-                  <img src="图片/推荐歌曲图33.jpg" alt="歌曲3">
+                  <img src="图片/推荐歌曲图33.jpg" alt="歌单3">
                   <div class="release-info">
                     <div class="play-count">148.1万</div>
-                    <h3 class="release-title">歌单3</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
-                  <img src="图片/推荐歌曲图34.jpg" alt="歌曲4">
+                  <img src="图片/推荐歌曲图34.jpg" alt="歌单4">
                   <div class="release-info">
                     <div class="play-count">1758.9万</div>
-                    <h3 class="release-title">歌单4</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
-                  <img src="图片/推荐歌曲图35.jpg" alt="歌曲5">
+                  <img src="图片/推荐歌曲图35.jpg" alt="歌单5">
                   <div class="release-info">
                     <div class="play-count">754.82万</div>
-                    <h3 class="release-title">歌单5</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
-                  <img src="图片/推荐歌曲图36.jpg" alt="歌曲6">
+                  <img src="图片/推荐歌曲图36.jpg" alt="歌单6">
                   <div class="release-info">
                     <div class="play-count">1451.35万</div>
-                    <h3 class="release-title">歌单6</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
               </div>
               <div class="release-scroll">
-                <!-- 第二个横向滚动列表 -->
-                <div class="release-card">
+                <!-- 推荐歌单第二个横向列表 -->
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
                   <img src="图片/推荐歌曲图41.jpg" alt="歌曲1">
                   <div class="release-info">
                     <div class="play-count">757.2万</div>
-                    <h3 class="release-title">歌曲1</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
                   <img src="图片/推荐歌曲图42.jpg" alt="歌曲2">
                   <div class="release-info">
                     <div class="play-count">1875.5万</div>
-                    <h3 class="release-title">歌曲2</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
                   <img src="图片/推荐歌曲图43.jpg" alt="歌曲3">
                   <div class="release-info">
                     <div class="play-count">145.1万</div>
-                    <h3 class="release-title">歌曲3</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
                   <img src="图片/推荐歌曲图44.jpg" alt="歌曲4">
                   <div class="release-info">
                     <div class="play-count">178.9万</div>
-                    <h3 class="release-title">歌曲4</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
                   <img src="图片/推荐歌曲图45.jpg" alt="歌曲5">
                   <div class="release-info">
                     <div class="play-count">394.8万</div>
-                    <h3 class="release-title">歌曲5</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
-                <div class="release-card">
+                <div class="release-card playlist-card">
                   <div class="overlay"><span class="play-icon">▶</span></div>
                   <img src="图片/推荐歌曲图46.jpg" alt="歌曲6">
                   <div class="release-info">
                     <div class="play-count">14.35万</div>
-                    <h3 class="release-title">歌曲6</h3>
+                    <div class="subtitle">推荐歌单</div>
                   </div>
                 </div>
               </div>
@@ -389,126 +395,229 @@
           <div class="module ">
             <div class="playlist-grid">
               <div class="playlist-card">
-                <img src="图片/playlist-card1.jpg" alt="宝岛华语流行">
+                <img src="图片/playlist-card1.jpg" alt="">
                 <div class="play-count">608.5万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
-                  <div class="title">宝岛华语流行 | 蔡旻佑,魏如萱,郭家玮领衔带来近...</div>
-                  <div class="subtitle">1 可惜不可以<br>2 我也我他<br>3 普通的日子</div>
+                  <div class="title">宝岛华语流行</div>
+                  <div class="subtitle">宝岛华语流行</div>
                 </div>
-                <div class="main-title">宝岛</div>
-                <div class="main-title-sub">华语流行</div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card2.jpg" alt="华语说唱">
+                <img src="图片/playlist-card2.jpg" alt="">
                 <div class="play-count">597.5万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">华语说唱 TREND</div>
-                  <div class="subtitle">华语说唱趋势 | 艾热AIR,李大奔BENZO和更多近...</div>
+                  <div class="subtitle">华语说唱趋势</div>
                 </div>
-                <div class="main-title">TREND</div>
-                <div class="main-title-sub">华语说唱</div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card3.jpg" alt="电音">
+                <img src="图片/playlist-card3.jpg" alt="">
                 <div class="play-count">1151.4万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">电音 TREND</div>
                   <div class="subtitle">全球电音趋势 | James Hype全新单曲热播中</div>
                 </div>
-                <div class="main-title">TREND</div>
-                <div class="main-title-sub">电音</div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card4.jpg" alt="新城粤语">
+                <img src="图片/playlist-card4.jpg" alt="">
                 <div class="play-count">71020</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">20s 新城粤语</div>
-                  <div class="subtitle">2020s新城粤语 | 呼吸有害,别为我好,低半度等更...</div>
+                  <div class="subtitle">2020s新城粤语 | 呼吸有害,别为我好,低半度等</div>
                 </div>
-                <div class="main-title">20s</div>
-                <div class="main-title-sub">新城粤语</div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card5.jpg" alt="KPOP热播">
+                <img src="图片/playlist-card5.jpg" alt="">
                 <div class="play-count">14.9万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">2025 KPOP热播</div>
-                  <div class="subtitle">KPop热播2025 | BLACKPINK带你开启年...</div>
+                  <div class="subtitle">KPop热播2025 | BLACKPINK带你开启</div>
                 </div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card6.jpg" alt="Jazz Lounge">
+                <img src="图片/playlist-card6.jpg" alt="">
                 <div class="play-count">11万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">Jazz Lounge</div>
                   <div class="subtitle">Jazz Lounge | 和音乐一起沉浸在轻松氛围</div>
                 </div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card7.jpg" alt="飞往目的地">
+                <img src="图片/playlist-card7.jpg" alt="">
                 <div class="play-count">14152</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">飞往目的地</div>
                   <div class="subtitle">飞往目的地 | 古典旋律陪你划过子午线</div>
                 </div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card8.jpg" alt="听歌识曲R&B">
+                <img src="图片/playlist-card8.jpg" alt="">
                 <div class="play-count">34.3万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">听歌识曲 R&B榜</div>
                   <div class="subtitle">听歌识曲R&B榜 | Mary J. Blige热单持续霸榜</div>
                 </div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card9.jpg" alt="华语经典">
+                <img src="图片/playlist-card9.jpg" alt="">
                 <div class="play-count">456.8万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">华语经典怀旧</div>
                   <div class="subtitle">重温经典华语老歌 | 周杰伦,王菲等经典作品</div>
                 </div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card10.jpg" alt="摇滚">
+                <img src="图片/playlist-card10.jpg" alt="">
                 <div class="play-count">234.1万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">摇滚精神</div>
                   <div class="subtitle">经典摇滚 | Beyond,五月天,黑豹等经典乐队</div>
                 </div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card11.jpg" alt="民谣">
+                <img src="图片/playlist-card11.jpg" alt="">
                 <div class="play-count">89.7万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">民谣故事</div>
                   <div class="subtitle">民谣故事 | 赵雷,陈粒,宋冬野等民谣歌手</div>
                 </div>
               </div>
               <div class="playlist-card">
-                <img src="图片/playlist-card12.jpg" alt="电子">
+                <img src="图片/playlist-card12.jpg" alt="">
                 <div class="play-count">156.2万</div>
-                <div class="play-button"></div>
+                <div class="play-button">▶</div>
                 <div class="info">
                   <div class="title">电子音乐节</div>
                   <div class="subtitle">电子音乐节 | EDM,House,Techno等电子音乐</div>
                 </div>
               </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card1.jpg" alt="">
+                <div class="play-count">608.5万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">宝岛华语流行</div>
+                  <div class="subtitle">宝岛华语流行</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card2.jpg" alt="">
+                <div class="play-count">597.5万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">华语说唱 TREND</div>
+                  <div class="subtitle">华语说唱趋势</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card3.jpg" alt="">
+                <div class="play-count">1151.4万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">电音 TREND</div>
+                  <div class="subtitle">全球电音趋势 | James Hype全新单曲热播中</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card4.jpg" alt="">
+                <div class="play-count">71020</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">20s 新城粤语</div>
+                  <div class="subtitle">2020s新城粤语 | 呼吸有害,别为我好,低半度等</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card5.jpg" alt="">
+                <div class="play-count">14.9万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">2025 KPOP热播</div>
+                  <div class="subtitle">KPop热播2025 | BLACKPINK带你开启</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card6.jpg" alt="">
+                <div class="play-count">11万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">Jazz Lounge</div>
+                  <div class="subtitle">Jazz Lounge | 和音乐一起沉浸在轻松氛围</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card1.jpg" alt="">
+                <div class="play-count">608.5万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">宝岛华语流行</div>
+                  <div class="subtitle">宝岛华语流行</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card2.jpg" alt="">
+                <div class="play-count">597.5万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">华语说唱 TREND</div>
+                  <div class="subtitle">华语说唱趋势</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card3.jpg" alt="">
+                <div class="play-count">1151.4万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">电音 TREND</div>
+                  <div class="subtitle">全球电音趋势 | James Hype全新单曲热播中</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card4.jpg" alt="">
+                <div class="play-count">71020</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">20s 新城粤语</div>
+                  <div class="subtitle">2020s新城粤语 | 呼吸有害,别为我好,低半度等</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card5.jpg" alt="">
+                <div class="play-count">14.9万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">2025 KPOP热播</div>
+                  <div class="subtitle">KPop热播2025 | BLACKPINK带你开启</div>
+                </div>
+              </div>
+              <div class="playlist-card">
+                <img src="图片/playlist-card6.jpg" alt="">
+                <div class="play-count">11万</div>
+                <div class="play-button">▶</div>
+                <div class="info">
+                  <div class="title">Jazz Lounge</div>
+                  <div class="subtitle">Jazz Lounge | 和音乐一起沉浸在轻松氛围</div>
+                </div>
+              </div>
             </div>
+          </div>
+          <div class="module">
+
           </div>
         </div>
 
-        <div class="">
+        <div class=" ">
           <div class="featured-section">
             榜单推荐
           </div>
@@ -517,7 +626,7 @@
           </div>
           <div class="featured-section">
             会员专区
-            <img src="VIP1" alt="VIP1"><img src="VIP2" alt="VIP2"><img src="VIP3" alt="VIP3">
+            <!-- <img src="VIP1" alt="VIP1"><img src="VIP2" alt="VIP2"><img src="VIP3" alt="VIP3"> -->
           </div>
           <div class="featured-section">
             说唱<br>
@@ -540,7 +649,105 @@
           </div>
         </div>
       </div>
-    </article>
+      <div class="playlist-page ">
+        <div class="album-header">
+          <div class="album-cover">
+            <img src="图片/playlist-card1.jpg" alt="" class="album-image">
+          </div>
+          <div class="album-aside">
+            <div class="album-aside__title">粤语流行趋势 | 谢安琪,Dear Jane,黄妍领衔带来近期粤语热歌</div>
+            <div class="album-aside__profile">Cover:陈柏宇；粤语歌不仅是一段旋律，更是一种刻在骨子里的情怀。从黄金时代的传世经...</div>
+            <div class="album-aside__info">
+              <div class="album-avatar"><img src="图片/歌单人头像.png" alt=""></div>
+              <div class="album-aside__info-username">云音乐官方歌单</div>
+              <div class="album-aside__info-time">2024-1-15创建</div>
+            </div>
+            <div class="album-aside-button">
+              <button class="album-aside__button active">▶ 播放全部</button>
+              <button class="album-aside__button">收藏</button>
+              <button class="album-aside__button">下载</button>
+              <button class="album-aside__button">...</button>
+            </div>
+          </div>
+        </div>
+        <div class="album-nav">
+          <div class="album-nav__item active">歌曲</div>
+          <div class="album-nav__item">评论</div>
+          <div class="album-nav__item">收藏者</div>
+          <input type="text" class="album-nav__search" placeholder="搜索">
+        </div>
+        <div class="album-article">
+          <div class="album-title">
+            <div class="album-title__item">#</div>
+            <div class="album-title__item">标题</div>
+            <div class="album-title__item">专辑</div>
+            <div class="album-title__item">喜欢</div>
+            <div class="album-title__item">时长</div>
+          </div>
+          <div class="album-tracks">
+            <div class="track">
+              <div class="track__item">01</div>
+              <div class="track__item">歌曲标题 1<br>艺术家 1</div>
+              <div class="track__item">专辑名称 1</div>
+              <div class="track__item">喜欢</div>
+              <div class="track__item">3:45</div>
+            </div>
+            <div class="track">
+              <div class="track__item">02</div>
+              <div class="track__item">歌曲标题 2<br>艺术家 2</div>
+              <div class="track__item">专辑名称 2</div>
+              <div class="track__item">喜欢</div>
+              <div class="track__item">4:20</div>
+            </div>
+            <div class="track">
+              <div class="track__item">03</div>
+              <div class="track__item">歌曲标题 3<br>艺术家 3</div>
+              <div class="track__item">专辑名称 3</div>
+              <div class="track__item">喜欢</div>
+              <div class="track__item">5:10</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+  </div>
+  <!-- 底部播放器 -->
+  <div class="now-playing-bar">
+    <div class="now-playing-bar__cover"><img src="图片/推荐歌曲图23.jpg" alt=""></div>
+    <div class="now-playing-bar__info">
+      <div class="now-playing-bar__title">歌曲标题</div>
+      <div class="now-playing-bar__artist">艺术家</div>
+    </div>
+    <div class="now-playing-bar__controls">
+      <button class="button-like">♡</button>
+      <button><img src="图片/评论.png" alt="评论区"></button>
+      <button>↻</button>
+      <button><img src="图片/上一首.png" alt=""></button>
+      <button class="button-isPlaying active">||</button>
+      <button class="button-isPlaying">▶</button>
+      <button><img src="图片/下一首.png" alt=""></button>
+      <!-- 播放、暂停等按钮 -->
+    </div>
+    <div class="now-playing-bar__options">
+      <button>音质</button>
+      <button>收藏</button>
+      <button>词</button>
+      <button>音量</button>
+      <button>...</button>
+    </div>
+    <div class="now-playing-bar__progress">
+      <!-- 进度条 -->
+    </div>
+  </div>
+  </article>
+
+  <!-- 音频元素 -->
+  <audio id="audio-player" preload="metadata"></audio>
+
+
+
+
+
 
 
 

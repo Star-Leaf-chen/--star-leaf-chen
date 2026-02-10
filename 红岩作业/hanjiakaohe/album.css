@@ -1,0 +1,272 @@
+.playlist-page {
+  display: none;
+  flex-direction: column;
+  background: rgb(247, 246, 247);
+  padding: 20px;
+}
+
+.playlist-page.active {
+  display: flex !important;
+  margin-top: 80px;
+}
+
+.album-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  background: linear-gradient(to bottom, rgb(248, 231, 226), rgb(247, 246, 247));
+}
+
+.album-cover {
+  width: 215px;
+  height: 215px;
+  margin-right: 70px;
+
+}
+
+.album-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.album-aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.album-aside__title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.album-aside__profile {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  max-width: 62.2vw;
+  overflow: hidden;
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 20px;
+  text-overflow: ellipsis;
+}
+
+.album-aside__info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 44px;
+}
+
+.album-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.album-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-aside__info-username {
+  font-size: 16px;
+  color: #555;
+  margin-right: 10px;
+}
+
+.album-aside__info-time {
+  font-size: 14px;
+  color: #888;
+}
+
+.album-aside-button {
+  display: flex;
+}
+
+.album-aside__button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: rgb(234, 230, 230);
+  font-size: 14px;
+  color: rgb(59, 68, 87);
+  cursor: pointer;
+}
+
+.album-aside__button.active {
+  background-color: #ff4d4d;
+  color: white;
+}
+
+
+.album-aside__button.active:hover {
+  background-color: rgb(227, 55, 69);
+}
+
+.album-aside__button:hover {
+  background-color: rgb(226, 221, 222);
+}
+
+.album-nav {
+  display: flex;
+  margin-bottom: 10px;
+  margin-left: 20px;
+  margin-top: 20px;
+
+}
+
+.album-nav__item {
+  margin-right: 30px;
+  padding-bottom: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  color: rgb(123, 127, 140);
+}
+
+.album-nav__item.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: rgb(40, 50, 72);
+  font-weight: bold;
+  align-items: center;
+}
+
+.album-nav__item.active::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 18px;
+  height: 3.5px;
+  background-color: rgb(252, 61, 73);
+  border-radius: 2px;
+  margin-top: 28px;
+}
+
+.album-nav__search {
+  margin-left: auto;
+  width: 70px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 18px;
+  font-size: 16px;
+  transition: width 0.3s ease, border-color 0.3s ease;
+}
+
+.album-nav__search:focus {
+  outline: none;
+  width: 420px;
+  border-color: #ff4d4d;
+}
+
+.album-nav__search input {
+  width: 100%;
+
+  border: none;
+  border-radius: 18px;
+  font-size: 16px;
+}
+
+
+.album-nav__search::placeholder {
+  color: #ccc;
+}
+
+.album-article {
+  align-items: center;
+  padding: 20px;
+  background-color: rgb(247, 246, 247);
+}
+
+.album-title {
+  display: flex;
+  font-weight: bold;
+  border-bottom: 0.2px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  color: rgb(142, 146, 157);
+}
+
+.album-title__item,
+.track__item {
+  flex: 1;
+  text-align: left;
+}
+
+.album-title__item:nth-child(1),
+.track__item:nth-child(1) {
+  flex: 0.2;
+  font-family: sans-serif;
+}
+
+.track__item:nth-child(2) {
+  color: rgb(40, 50, 72);
+}
+
+.album-title__item:nth-child(3),
+.track__item:nth-child(3) {
+  flex: 0.5;
+}
+
+.album-title__item:nth-child(4),
+.track__item:nth-child(4) {
+  flex: 0.3;
+}
+
+.album-title__item:nth-child(5),
+.track__item:nth-child(5) {
+  flex: 0.3;
+}
+
+.album-tracks {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  border-bottom: 0.1px solid #eee;
+}
+
+.track {
+  display: flex;
+  height: 50px;
+  color: #333;
+  background-color: rgb(247, 246, 247);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.track__item:nth-child(4):hover {
+  color: rgb(57, 65, 83);
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.track__item.track__index:hover {
+  color: rgb(57, 65, 83);
+  cursor: pointer;
+  font-size: 17px;
+
+}
+
+.track__item:nth-child(4).track__item-like {
+  color: rgb(252, 61, 73);
+}
+
+.track:hover {
+  background-color: white;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.track__item {
+  flex: 1;
+  text-align: left;
+  color: rgb(100, 106, 123);
+}
