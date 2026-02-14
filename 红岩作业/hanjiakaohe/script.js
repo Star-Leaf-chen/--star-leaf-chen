@@ -1,4 +1,4 @@
-// 格式化播放次数（例如：12345678 -> 1234.5万）
+//播放次数（例如：12345678 -> 1234.5万）
 function formatPlayCount(count) {
   if (!count) return '0';
   if (count >= 10000) {
@@ -7,7 +7,7 @@ function formatPlayCount(count) {
   return count.toString();
 }
 
-// 格式化歌曲时长（毫秒转 mm:ss）
+//歌曲时长
 function formatDuration(ms) {
   if (!ms) return '0:00';
   const seconds = Math.floor(ms / 1000);
@@ -16,6 +16,51 @@ function formatDuration(ms) {
   return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
+// 从图片URL提取主色调
+function extractColorFromImage(imageUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = 1;
+      canvas.height = 1;
+      ctx.drawImage(img, 0, 0, 1, 1);
+      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+      const darkFactor = 0.5;
+      const rDark = Math.floor(r * darkFactor);
+      const gDark = Math.floor(g * darkFactor);
+      const bDark = Math.floor(b * darkFactor);
+      resolve({
+        light: `rgb(${r}, ${g}, ${b})`,
+        dark: `rgb(${rDark}, ${gDark}, ${bDark})`
+      });
+    };
+
+    img.onerror = function() {
+      resolve({
+        light: 'rgb(74, 31, 31)',
+        dark: 'rgb(44, 18, 18)'
+      });
+    };
+
+    img.src = imageUrl;
+  });
+}
+
+// 应用颜色到卡片
+async function applyColorToCard(card, imageUrl) {
+  const colors = await extractColorFromImage(imageUrl);
+  const infoDiv = card.querySelector('.info');
+  if (infoDiv) {
+    // 正常状态使用light，hover状态使用渐变色
+    infoDiv.style.background = colors.light;
+  }
+  card.style.background = colors.light;
+}
 // 顶部搜索框
 const headerInput = document.querySelector('header input');
 const backButton = document.getElementById('backButton');
@@ -34,9 +79,98 @@ headerInput.addEventListener('focus', () => {
   }, 400);
 });
 
+// 搜索功能
+headerInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const keywords = headerInput.value.trim();
+    if (keywords) {
+      performSearch(keywords);
+      // 防止 Enter 键触发其他事件
+      e.preventDefault();
+    }
+  }
+});
+
+// 执行搜索
+function performSearch(keywords) {
+  console.log('搜索关键词:', keywords);
+
+  fetch(`http://localhost:3000/search?keywords=${encodeURIComponent(keywords)}`)
+    .then(res => res.json())
+    .then(res => {
+      if (res.result?.songs?.length > 0) {
+        console.log('第一首歌的数据:', res.result.songs[0]);
+      }
+      displaySearchResults(res);
+    })
+    .catch(err => {
+      console.error('搜索失败:', err);
+    });
+}
+
+// 显示搜索结果
+function displaySearchResults(searchData) {
+  // 清空热搜列表
+  if (hotList) {
+    hotList.innerHTML = '';
+  }
+
+  const hotListTitle = document.querySelector('.hot-list-title');
+  if (hotListTitle) {
+    hotListTitle.textContent = '搜索结果';
+  }
+
+  // 显示歌曲
+  if (searchData.result && searchData.result.songs && searchData.result.songs.length > 0) {
+    searchData.result.songs.forEach((song, index) => {
+      const resultItem = document.createElement('div');
+      resultItem.classList.add('hot-list-item');
+
+      const rankSpan = document.createElement('span');
+      rankSpan.classList.add('hot-list-rank');
+      rankSpan.textContent = index + 1;
+
+      const keywordSpan = document.createElement('span');
+      keywordSpan.classList.add('hot-list-keyword');
+
+      // 处理艺术家名称
+      const artistNames = song.artists ? song.artists.map(a => a.name).join('/') :
+                          song.ar ? song.ar.map(a => a.name).join('/') : '未知艺术家';
+
+      keywordSpan.textContent = `${song.name || '未知歌曲'} - ${artistNames}`;
+
+      resultItem.appendChild(rankSpan);
+      resultItem.appendChild(keywordSpan);
+
+      resultItem.addEventListener('click', () => {
+        console.log('播放搜索结果歌曲:', song);
+        console.log('歌曲对象完整数据:', JSON.stringify(song));
+
+        // 处理专辑封面图片
+        let albumImage = 'https://p3.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg';
+        playSong(song, albumImage);
+
+        // 播放后关闭搜索框
+        headerInput.blur();
+        searchSuggestion.classList.remove('active');
+      });
+
+      hotList.appendChild(resultItem);
+    });
+  }
+
+  // 显示专辑
+  if (searchData.result && searchData.result.albums && searchData.result.albums.length > 0) {
+    // 可以扩展显示专辑逻辑
+  }
+}
+
 headerInput.addEventListener('blur', () => {
-  headerInput.style.background = 'linear-gradient(to right, rgb(235, 240, 251), rgb(247, 238, 246))';
-  searchSuggestion.classList.remove('active');
+  // 延迟隐藏，确保点击事件可以触发
+  setTimeout(() => {
+    headerInput.style.background = 'linear-gradient(to right, rgb(235, 240, 251), rgb(247, 238, 246))';
+    searchSuggestion.classList.remove('active');
+  }, 200);
 });
 
 // 默认关键词
@@ -89,6 +223,35 @@ fetch(`http://localhost:3000/search/hot`)
           keywordItem.appendChild(rankSpan);
           keywordItem.appendChild(keywordSpan);
           keywordItem.appendChild(scoreSpan);
+
+          // 点击热搜词执行搜索并播放第一首
+          keywordItem.addEventListener('click', () => {
+            const keyword = item.first;
+            console.log('点击热搜词:', keyword);
+
+            // 执行搜索
+            fetch(`http://localhost:3000/search?keywords=${encodeURIComponent(keyword)}`)
+              .then(res => res.json())
+              .then(res => {
+                console.log('热搜搜索结果:', res);
+                if (res.result && res.result.songs && res.result.songs.length > 0) {
+                  const firstSong = res.result.songs[0];
+
+                  // 处理专辑封面图片
+                  let albumImage = 'https://p3.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg';
+                  playSong(firstSong, albumImage);
+                  // 关闭搜索框
+                  headerInput.value = keyword;
+                  headerInput.blur();
+                  searchSuggestion.classList.remove('active');
+                } else {
+                  console.error('没有找到相关歌曲');
+                }
+              })
+              .catch(err => {
+                console.error('热搜搜索失败:', err);
+              });
+          });
 
           hotList.appendChild(keywordItem);
         });
@@ -286,6 +449,8 @@ document.addEventListener('DOMContentLoaded', function () {
               const countElement = card.querySelector('.play-count');
               if (imgElement) {
                 imgElement.src = playlist.coverImgUrl;
+                // 应用封面颜色到info背景
+                applyColorToCard(card, playlist.coverImgUrl);
               }
               if (subtitleElement) {
                 subtitleElement.textContent = playlist.name || '推荐歌单';
@@ -352,13 +517,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             // 获取艺术家名称
                             const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
                             track.like = track.like || '♡';
-                            trackDiv.innerHTML = `
-                            <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
-                            <div class="track__item">${track.name || '未知歌曲'}<br><span style="color: rgb(100, 106, 123);">${artistNames}</span></div>
-                            <div class="track__item">${track.al ? track.al.name : '未知专辑'}</div>
-                            <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
-                            <div class="track__item">${duration}</div>
-                          `;
+                           trackDiv.innerHTML = `
+                        <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
+                        <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
+                        <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
+                        <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
+                        <div class="track__item">${duration}</div>
+                      `;
                             const trackLike = trackDiv.querySelector('.track__like');
                             const trackIndex = trackDiv.querySelector('.track__index');
                             // 添加鼠标悬停效果
@@ -367,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function () {
                               trackIndex.textContent = '▶';
                               trackIndex.addEventListener('click', (e) => {
                                 e.stopPropagation();
-                                playSong(track, playlistDetail.coverImgUrl);
+                                playSong(track, playlistDetail.coverImgUrl, playlistDetail.tracks, index);
                               });
                             });
                             trackDiv.addEventListener('mouseleave', () => {
@@ -376,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                             // 添加双击事件
                             trackDiv.addEventListener('dblclick', () => {
-                              playSong(track, playlistDetail.coverImgUrl);
+                              playSong(track, playlistDetail.coverImgUrl, playlistDetail.tracks, index);
                             });
                             if (trackLike) {
                               trackLike.addEventListener('click', (e) => {
@@ -413,6 +578,8 @@ document.addEventListener('DOMContentLoaded', function () {
               const countElement = card.querySelector('.play-count');
               if (imgElement) {
                 imgElement.src = playlist.coverImgUrl;
+                // 应用封面颜色到info背景
+                applyColorToCard(card, playlist.coverImgUrl);
               }
               if (titleElement) {
                 titleElement.textContent = playlist.name;
@@ -483,12 +650,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
                             track.like = track.like || '♡';
                             trackDiv.innerHTML = `
-                            <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
-                            <div class="track__item">${track.name || '未知歌曲'}<br><span style="color: rgb(100, 106, 123);">${artistNames}</span></div>
-                            <div class="track__item">${track.al ? track.al.name : '未知专辑'}</div>
-                            <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
-                            <div class="track__item">${duration}</div>
-                          `;
+                        <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
+                        <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
+                        <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
+                        <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
+                        <div class="track__item">${duration}</div>
+                      `;
                             const trackLike = trackDiv.querySelector('.track__like');
                             const trackIndex = trackDiv.querySelector('.track__index');
                             // 添加鼠标悬停效果
@@ -497,7 +664,7 @@ document.addEventListener('DOMContentLoaded', function () {
                               trackIndex.textContent = '▶';
                               trackIndex.addEventListener('click', (e) => {
                                 e.stopPropagation();
-                                playSong(track, playlistDetail.coverImgUrl);
+                                playSong(track, playlistDetail.coverImgUrl, playlistDetail.tracks, index);
                               });
                             });
                             trackDiv.addEventListener('mouseleave', () => {
@@ -506,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                             // 添加双击事件
                             trackDiv.addEventListener('dblclick', () => {
-                              playSong(track, playlistDetail.coverImgUrl);
+                              playSong(track, playlistDetail.coverImgUrl, playlistDetail.tracks, index);
                             });
                             if (trackLike) {
                               trackLike.addEventListener('click', (e) => {
@@ -683,6 +850,8 @@ fetch(`http://localhost:3000/top/playlist/highquality`)
           </div>
         `;
 
+        // 应用封面颜色到info背景
+        applyColorToCard(card, playlist.coverImgUrl);
         // 添加鼠标悬停效果
         card.addEventListener('mouseenter', () => {
           const infoDiv = card.querySelector('.info');
@@ -691,6 +860,9 @@ fetch(`http://localhost:3000/top/playlist/highquality`)
           titleDiv.classList.add('hover');
           infoDiv.classList.add('hover');
           subtitleDiv.classList.add('hover');
+          extractColorFromImage(playlist.coverImgUrl).then(colors => {
+            infoDiv.style.background = `linear-gradient(to top, ${colors.dark}, ${colors.light}, transparent)`;
+          });
         });
 
         card.addEventListener('mouseleave', () => {
@@ -700,6 +872,9 @@ fetch(`http://localhost:3000/top/playlist/highquality`)
           titleDiv.classList.remove('hover');
           infoDiv.classList.remove('hover');
           subtitleDiv.classList.remove('hover');
+          extractColorFromImage(playlist.coverImgUrl).then(colors => {
+            infoDiv.style.background = colors.light;
+          });
         });
 
         // 添加点击事件 - 加载专辑详情
@@ -764,8 +939,8 @@ fetch(`http://localhost:3000/top/playlist/highquality`)
                       track.like = track.like || '♡';
                       trackDiv.innerHTML = `
                         <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
-                        <div class="track__item">${track.name || '未知歌曲'}<br><span style="color: rgb(100, 106, 123);">${artistNames}</span></div>
-                        <div class="track__item">${track.al ? track.al.name : '未知专辑'}</div>
+                        <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
+                        <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
                         <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
                         <div class="track__item">${duration}</div>
                       `;
@@ -777,7 +952,7 @@ fetch(`http://localhost:3000/top/playlist/highquality`)
                         trackIndex.textContent = '▶';
                         trackIndex.addEventListener('click', (e) => {
                           e.stopPropagation();
-                          playSong(track, playlist.coverImgUrl);
+                          playSong(track, playlist.coverImgUrl, playlist.tracks, index);
                         });
                       });
                       trackDiv.addEventListener('mouseleave', () => {
@@ -786,7 +961,7 @@ fetch(`http://localhost:3000/top/playlist/highquality`)
                       });
                       // 添加双击事件
                       trackDiv.addEventListener('dblclick', () => {
-                        playSong(track, playlist.coverImgUrl);
+                        playSong(track, playlist.coverImgUrl, playlist.tracks, index);
                       });
                       if (trackLike) {
                         trackLike.addEventListener('click', (e) => {
@@ -855,8 +1030,36 @@ const nowPlayingBarControls = nowPlayingBar.querySelector('.now-playing-bar__con
 const nowPlayingBarPlayButton = nowPlayingBar.querySelector('.button-isPlaying');
 const nowPlayingBarPauseButton = nowPlayingBarControls.querySelector('.button-isPlaying:nth-child(6)');
 const nowPlayingBarLikeButton = nowPlayingBar.querySelector('.now-playing-bar__controls .button-like');
+const nowPlayingBarPrevButton = nowPlayingBar.querySelector('.button-prev');
+const nowPlayingBarNextButton = nowPlayingBar.querySelector('.button-next');
+const nowPlayingBarProgress = nowPlayingBar.querySelector('.now-playing-bar__progress');
+const musicPlayerPage = document.querySelector('.music-player-page');
+// 点击底部播放器歌曲封面，显示歌曲歌词
+nowPlayingBarCover.addEventListener('click', () => {
+  musicPlayerPage.classList.add('active');
+  nowPlayingBar.classList.remove('active');
+});
+// 创建进度条时间提示
+const progressTooltip = document.createElement('div');
+progressTooltip.className = 'progress-tooltip';
+nowPlayingBarProgress.appendChild(progressTooltip);
 
 let currentTrack = null;
+let currentTrackList = [];
+let currentTrackIndex = 0;
+let currentAlbumCover = null;
+
+
+
+// 鼠标经过进度条，上方出现黑影
+nowPlayingBarProgress.addEventListener('mousemove', (e) => {
+  nowPlayingBar.classList.add('hover');
+});
+
+
+nowPlayingBarProgress.addEventListener('mouseleave', () => {
+  nowPlayingBar.classList.remove('hover');
+});
 
 // 喜欢按钮事件
 nowPlayingBarLikeButton.like = '♡';
@@ -868,19 +1071,44 @@ nowPlayingBarLikeButton.addEventListener('click', (e) => {
 });
 
 // 播放歌曲函数
-function playSong(track, albumImage) {
+function playSong(track, albumImage, trackList = null, index = null) {
   currentTrack = track;
+  currentAlbumCover = albumImage;
+
+  // 如果传入了播放列表和索引
+  if (trackList && index !== null) {
+    currentTrackList = trackList;
+    currentTrackIndex = index;
+  }
+
+  console.log('playSong 调用, track:', track);
+  console.log('playSong 调用, albumImage:', albumImage);
 
   // 更新播放器信息
   if (nowPlayingBarTitle) {
     nowPlayingBarTitle.textContent = track.name || '未知歌曲';
   }
   if (nowPlayingBarArtist) {
-    const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
+    // 兼容不同的艺术家数据格式: ar 或 artists
+    const artistNames = track.artists ? track.artists.map(a => a.name).join('/') :
+                        track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
     nowPlayingBarArtist.textContent = artistNames;
+    console.log('艺术家名称:', artistNames);
   }
-  if (nowPlayingBarCover && albumImage) {
-    nowPlayingBarCover.src = albumImage;
+
+  // 处理专辑封面图片
+  let coverImage = albumImage;
+  if (!coverImage && track.al?.picUrl) {
+    coverImage = track.al.picUrl;
+  } else if (!coverImage && track.album?.picUrl) {
+    coverImage = track.album.picUrl;
+  } else if (!coverImage && track.art?.picUrl) {
+    coverImage = track.art.picUrl;
+  }
+
+  if (nowPlayingBarCover && coverImage) {
+    nowPlayingBarCover.src = coverImage;
+    console.log('设置封面:', coverImage);
   }
 
   // 获取歌曲播放地址
@@ -907,6 +1135,24 @@ function playSong(track, albumImage) {
     });
 }
 
+// 播放上一首
+function playPrevSong() {
+  if (currentTrackList.length > 0) {
+    currentTrackIndex = (currentTrackIndex - 1 + currentTrackList.length) % currentTrackList.length;
+    const prevTrack = currentTrackList[currentTrackIndex];
+    playSong(prevTrack, currentAlbumCover, currentTrackList, currentTrackIndex);
+  }
+}
+
+// 播放下一首
+function playNextSong() {
+  if (currentTrackList.length > 0) {
+    currentTrackIndex = (currentTrackIndex + 1) % currentTrackList.length;
+    const nextTrack = currentTrackList[currentTrackIndex];
+    playSong(nextTrack, currentAlbumCover, currentTrackList, currentTrackIndex);
+  }
+}
+
 // 播放按钮点击事件
 nowPlayingBarPlayButton.addEventListener('click', () => {
   audio.play();
@@ -928,4 +1174,56 @@ audio.addEventListener('ended', () => {
   nowPlayingBarPauseButton.classList.remove('active');
   nowPlayingBarPlayButton.classList.add('active');
   nowPlayingBarCover.classList.remove('active');
+
+  // 自动播放下一首
+  playNextSong();
 });
+
+// 更新进度条
+audio.addEventListener('timeupdate', () => {
+  if (audio.duration > 0) {
+    const progress = (audio.currentTime / audio.duration) * 100;
+    if (nowPlayingBarProgress) {
+      nowPlayingBarProgress.style.setProperty('--progress', `${progress}%`);
+
+      // 更新时间提示
+      const currentTimeStr = formatDuration(audio.currentTime * 1000);
+      const durationStr = formatDuration(audio.duration * 1000);
+      progressTooltip.textContent = `${currentTimeStr} / ${durationStr}`;
+      progressTooltip.style.left = `${progress}%`;
+    }
+  }
+});
+
+// 音频加载时重置进度条
+audio.addEventListener('loadedmetadata', () => {
+  if (nowPlayingBarProgress) {
+    nowPlayingBarProgress.style.setProperty('--progress', '0%');
+  }
+});
+
+// 点击进度条跳转
+if (nowPlayingBarProgress) {
+  nowPlayingBarProgress.addEventListener('click', (e) => {
+    if (audio.duration > 0) {
+      const rect = nowPlayingBarProgress.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = x / rect.width;
+      audio.currentTime = percentage * audio.duration;
+    }
+  });
+}
+
+// 上一首按钮点击事件
+if (nowPlayingBarPrevButton) {
+  nowPlayingBarPrevButton.addEventListener('click', () => {
+    playPrevSong();
+  });
+}
+
+// 下一首按钮点击事件
+if (nowPlayingBarNextButton) {
+  nowPlayingBarNextButton.addEventListener('click', () => {
+    playNextSong();
+  });
+}

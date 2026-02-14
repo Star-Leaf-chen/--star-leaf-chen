@@ -270,3 +270,34 @@
   text-align: left;
   color: rgb(100, 106, 123);
 }
+.track__item-img{
+  margin-right: 10px;
+}
+.track__item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.track__item.track__title {
+display: flex;
+align-items: center;
+}
+
+.track__item-artist{
+  color: rgb(100, 106, 123);
+  cursor: pointer;
+}
+
+.track__item-artist:hover{
+  color: rgb(57, 65, 83);
+}
+
+.track__album{
+  cursor: pointer;
+}
+
+.track__album:hover{
+  color: rgb(57, 65, 83);
+}

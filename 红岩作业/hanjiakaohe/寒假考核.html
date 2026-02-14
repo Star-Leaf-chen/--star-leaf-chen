@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="album.css">
   <link rel="stylesheet" href="now-playing-bar.css">
+  <link rel="stylesheet" href="music-player-page.css">
   <link rel="icon" href="图片/logo.webp" type="image/x-icon">
 </head>
 
@@ -36,33 +37,32 @@
     </aside>
     <article>
       <header>
-        <button class="header-button" id="backButton">
-          < </button>
-            <div class="header-input">
-              <div><img src="图片/搜索.png" alt=""></div>
-              <input type="text" placeholder="">
-            </div>
-            <div class="search-suggestion">
-              <div class="hot-list-title">热搜榜</div>
-              <div class="hot-list"></div>
-            </div>
-            <div class="header-icon"><img src="图片/听歌识曲.png" alt=""></div>
-            <div class="user">
-              <div class="user-avatar"><img src="图片/用户头像.png" alt="用户"></div>
-              <div class="user-name">用户名</div>
-              <div class="user-vip"><img src="图片/VIP.png" alt="VIP"></div>
-            </div>
-            <div class="header-content">></div>
-            <div class="header-nav">
-              <div class="header-nav-item"><img src="图片/消息中心.png" alt="消息中心"></div>
-              <div class="header-nav-item"><img src="图片/设置.png" alt="设置"></div>
-              <div class="header-nav-item"><img src="图片/换肤.png" alt="换肤"></div>
+        <button class="header-button" id="backButton">&lt;</button>
+        <div class="header-input">
+          <div><img src="图片/搜索.png" alt=""></div>
+          <input type="text" placeholder="">
+        </div>
+        <div class="search-suggestion">
+          <div class="hot-list-title">热搜榜</div>
+          <div class="hot-list"></div>
+        </div>
+        <div class="header-icon"><img src="图片/听歌识曲.png" alt=""></div>
+        <div class="user">
+          <div class="user-avatar"><img src="图片/用户头像.png" alt="用户"></div>
+          <div class="user-name">用户名</div>
+          <div class="user-vip"><img src="图片/VIP.png" alt="VIP"></div>
+        </div>
+        <div class="header-content">></div>
+        <div class="header-nav">
+          <div class="header-nav-item"><img src="图片/消息中心.png" alt="消息中心"></div>
+          <div class="header-nav-item"><img src="图片/设置.png" alt="设置"></div>
+          <div class="header-nav-item"><img src="图片/换肤.png" alt="换肤"></div>
 
-              <div class="header-nav-item"><img src="图片/mini模式.png" alt="mini模式"></div>
-              <div class="header-nav-item"><img src="图片/最小化.png" alt="最小化"></div>
-              <div class="header-nav-item"><img src="图片/最大化.png" alt="最大化"></div>
-              <div class="header-nav-item"><img src="图片/关闭.png" alt="关闭"></div>
-            </div>
+          <div class="header-nav-item"><img src="图片/mini模式.png" alt="mini模式"></div>
+          <div class="header-nav-item"><img src="图片/最小化.png" alt="最小化"></div>
+          <div class="header-nav-item"><img src="图片/最大化.png" alt="最大化"></div>
+          <div class="header-nav-item"><img src="图片/关闭.png" alt="关闭"></div>
+        </div>
       </header>
       <div class="page active">
         <div class="release-list" id="releaseList">
@@ -687,7 +687,7 @@
           <div class="album-tracks">
             <div class="track">
               <div class="track__item">01</div>
-              <div class="track__item">歌曲标题 1<br>艺术家 1</div>
+              <div class="track__item"><img src="图片/推荐歌曲图23.jpg" alt="">歌曲标题 1<br>艺术家 1</div>
               <div class="track__item">专辑名称 1</div>
               <div class="track__item">喜欢</div>
               <div class="track__item">3:45</div>
@@ -711,6 +711,64 @@
         </div>
       </div>
   </div>
+  <div class="music-player-page">
+    <div class="music-player-page__header">
+      <div>></div>
+      <div>播放器模式</div>
+      <div class="header-nav-item music-player-page__header-item">⬜</div>
+      <div class="header-nav-item music-player-page__header-item">🗟</div>
+      <div class="header-nav-item music-player-page__header-item">🗖</div>
+      <div class="header-nav-item music-player-page__header-item">✕</div>
+    </div>
+    <div class="music-player-page__article">
+      <div class="music-player-page__cover"><img src="" alt="歌曲封面"></div>
+      <div class="music-player-page__content">
+        <div class="music-player-page__content-header">
+          <div class="music-player-page__title">歌曲标题</div>
+          <div class="music-player-page__info">
+            <div class="music-player-page__info-album">专辑</div>
+            <div class="music-player-page__info-artist">艺术家</div>
+            <div class="music-player-page__info-source">来源</div>
+          </div>
+        </div>
+        <div class="music-player-page__content-nav">
+          <div class="music-player-page__content-nav-item">歌词</div>
+          <div class="music-player-page__content-nav-item">百科</div>
+          <div class="music-player-page__content-nav-item">相似推荐</div>
+        </div>
+        <div class="music-player-page__lyrics">
+          <!-- 歌词内容将在此处添加 -->
+          <div class="music-player-page__lyric-line">歌词内容</div>
+          <div class="music-player-page__lyric-line--active">当前正在播放的歌词</div>
+        </div>
+      </div>
+    </div>
+    <div class="now-playing-bar__cover"><img src="图片/推荐歌曲图23.jpg" alt=""></div>
+    <div class="now-playing-bar__info">
+      <div class="now-playing-bar__title">歌曲标题</div>
+      <div class="now-playing-bar__artist">艺术家</div>
+    </div>
+    <div class="now-playing-bar__controls">
+      <button class="button-like">♡</button>
+      <button><img src="图片/评论.png" alt="评论区"></button>
+      <button>↻</button>
+      <button class="button-prev"><img src="图片/上一首.png" alt="上一首"></button>
+      <button class="button-isPlaying active">||</button>
+      <button class="button-isPlaying">▶</button>
+      <button class="button-next"><img src="图片/下一首.png" alt="下一首"></button>
+      <!-- 播放、暂停等按钮 -->
+    </div>
+    <div class="now-playing-bar__options">
+      <button>音质</button>
+      <button>收藏</button>
+      <button>词</button>
+      <button>音量</button>
+      <button>...</button>
+    </div>
+    <div class="now-playing-bar__progress">
+      <!-- 进度条 -->
+    </div>
+  </div>
   <!-- 底部播放器 -->
   <div class="now-playing-bar">
     <div class="now-playing-bar__cover"><img src="图片/推荐歌曲图23.jpg" alt=""></div>
@@ -722,10 +780,10 @@
       <button class="button-like">♡</button>
       <button><img src="图片/评论.png" alt="评论区"></button>
       <button>↻</button>
-      <button><img src="图片/上一首.png" alt=""></button>
+      <button class="button-prev"><img src="图片/上一首.png" alt="上一首"></button>
       <button class="button-isPlaying active">||</button>
       <button class="button-isPlaying">▶</button>
-      <button><img src="图片/下一首.png" alt=""></button>
+      <button class="button-next"><img src="图片/下一首.png" alt="下一首"></button>
       <!-- 播放、暂停等按钮 -->
     </div>
     <div class="now-playing-bar__options">
