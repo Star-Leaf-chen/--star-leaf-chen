@@ -47,11 +47,67 @@
           <div class="hot-list"></div>
         </div>
         <div class="header-icon"><img src="图片/听歌识曲.png" alt=""></div>
-        <div class="user">
-          <div class="user-avatar"><img src="图片/用户头像.png" alt="用户"></div>
-          <div class="user-name">用户名</div>
-          <div class="user-vip"><img src="图片/VIP.png" alt="VIP"></div>
+<div class="user">
+        <div class="user-avatar" id="userAvatar"><img src="图片/用户头像.png" alt="用户"></div>
+        <div class="user-name" id="userName">未登录</div>
+        <div class="user-vip" id="userVip"><img src="图片/VIP.png" alt="VIP"></div>
+      </div>
+
+      <!-- 登录弹窗 -->
+      <div class="login-modal" id="loginModal">
+        <div class="login-modal__content">
+          <div class="login-modal__logo">
+            <img src="图片/网易云音乐.png" alt="网易云音乐">
+          </div>
+          <button class="login-modal__close" id="loginModalClose">&times;</button>
+          
+          <div class="login-modal__phone-container">
+            <div class="login-modal__countrycode-container">
+              <select class="login-modal__countrycode" id="countryCode">
+                <option value="86">+86</option>
+                <option value="1">+1</option>
+                <option value="44">+44</option>
+                <option value="81">+81</option>
+              </select>
+            </div>
+            <div class="login-modal__phone-container-input">
+              <input type="tel" class="login-modal__phone" id="phone" placeholder="请输入手机号">
+            </div>
+          </div>
+          
+          <div class="login-modal__options">
+            <label class="login-modal__auto-login">
+              <input class="login-modal__auto-login-checkbox" type="checkbox" id="autoLogin" checked>
+              <div class="login-modal__auto-login-text">自动登录</div>
+            </label>
+            <a href="#" class="login-modal__password-login">密码登录</a>
+          </div>
+          
+          <button class="login-modal__submit" id="loginSubmit">验证码登录</button>
+          
+          <div class="login-modal__social-login">
+            <div class="login-modal__social-item">
+              <img src="图片/微信.png" alt="微信">
+            </div>
+            <div class="login-modal__social-item">
+              <img src="图片/QQ.png" alt="QQ">
+            </div>
+            <div class="login-modal__social-item">
+              <img src="图片/微博.png" alt="微博">
+            </div>
+            <div class="login-modal__social-item">
+              <img src="图片/易信.png" alt="易信">
+            </div>
+          </div>
+          
+          <div class="login-modal__agreement">
+            <label>
+              <input type="checkbox" id="agreement" >
+              同意《<a href="#">服务条款</a>》《<a href="#">隐私政策</a>》《<a href="#">儿童隐私政策</a>》
+            </label>
+          </div>
         </div>
+      </div>
         <div class="header-content">></div>
         <div class="header-nav">
           <div class="header-nav-item"><img src="图片/消息中心.png" alt="消息中心"></div>
@@ -713,7 +769,7 @@
   </div>
   <div class="music-player-page">
     <div class="music-player-page__header">
-      <div>></div>
+      <div class="music-player-page__header-shrink">></div>
       <div>播放器模式</div>
       <div class="header-nav-item music-player-page__header-item">⬜</div>
       <div class="header-nav-item music-player-page__header-item">🗟</div>
@@ -721,14 +777,14 @@
       <div class="header-nav-item music-player-page__header-item">✕</div>
     </div>
     <div class="music-player-page__article">
-      <div class="music-player-page__cover"><img src="" alt="歌曲封面"></div>
+      <div class="music-player-page__cover"><img src="图片/推荐歌曲图23.jpg" alt="歌曲封面"></div>
       <div class="music-player-page__content">
         <div class="music-player-page__content-header">
           <div class="music-player-page__title">歌曲标题</div>
           <div class="music-player-page__info">
-            <div class="music-player-page__info-album">专辑</div>
-            <div class="music-player-page__info-artist">艺术家</div>
-            <div class="music-player-page__info-source">来源</div>
+            <div class="music-player-page__info-album">专辑:</div>
+            <div class="music-player-page__info-artist">歌手:</div>
+            <div class="music-player-page__info-source">来源:</div>
           </div>
         </div>
         <div class="music-player-page__content-nav">
@@ -743,19 +799,21 @@
         </div>
       </div>
     </div>
-    <div class="now-playing-bar__cover"><img src="图片/推荐歌曲图23.jpg" alt=""></div>
+  
+  
+  <div class="music-now-playing-bar">
     <div class="now-playing-bar__info">
-      <div class="now-playing-bar__title">歌曲标题</div>
-      <div class="now-playing-bar__artist">艺术家</div>
+      <div class="now-playing-bar__title music-now-playing-bar__title">歌曲标题</div>
+      <div class="now-playing-bar__artist music-now-playing-bar__artist">艺术家</div>
     </div>
     <div class="now-playing-bar__controls">
       <button class="button-like">♡</button>
       <button><img src="图片/评论.png" alt="评论区"></button>
       <button>↻</button>
-      <button class="button-prev"><img src="图片/上一首.png" alt="上一首"></button>
-      <button class="button-isPlaying active">||</button>
-      <button class="button-isPlaying">▶</button>
-      <button class="button-next"><img src="图片/下一首.png" alt="下一首"></button>
+      <button class="button-prev music-now-playing-bar__prev"><img src="图片/上一首.png" alt="上一首"></button>
+      <button class="button-isPlaying active music-now-playing-bar__play">▶</button>
+      <button class="button-isPlaying music-now-playing-bar__pause">||</button>
+      <button class="button-next music-now-playing-bar__next"><img src="图片/下一首.png" alt="下一首"></button>
       <!-- 播放、暂停等按钮 -->
     </div>
     <div class="now-playing-bar__options">
@@ -768,6 +826,7 @@
     <div class="now-playing-bar__progress">
       <!-- 进度条 -->
     </div>
+  </div>
   </div>
   <!-- 底部播放器 -->
   <div class="now-playing-bar">

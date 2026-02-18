@@ -7,6 +7,18 @@ function formatPlayCount(count) {
   return count.toString();
 }
 
+// 获取请求头配置
+function getAuthHeaders() {
+  const token = localStorage.getItem('neteaseToken');
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 //歌曲时长
 function formatDuration(ms) {
   if (!ms) return '0:00';
@@ -804,17 +816,17 @@ playlistCards.forEach((card) => {
     const infoDiv = card.querySelector('.playlist-card .info');
     const titleDiv = card.querySelector('.playlist-card .title');
     const subtitleDiv = card.querySelector('.playlist-card .subtitle');
-    titleDiv.classList.add('hover');
-    infoDiv.classList.add('hover');
-    subtitleDiv.classList.add('hover');
+    if (titleDiv) titleDiv.classList.add('hover');
+    if (infoDiv) infoDiv.classList.add('hover');
+    if (subtitleDiv) subtitleDiv.classList.add('hover');
   });
   card.addEventListener('mouseleave', () => {
     const infoDiv = card.querySelector('.playlist-card .info');
     const titleDiv = card.querySelector('.playlist-card .title');
     const subtitleDiv = card.querySelector('.playlist-card .subtitle');
-    titleDiv.classList.remove('hover');
-    infoDiv.classList.remove('hover');
-    subtitleDiv.classList.remove('hover');
+    if (titleDiv) titleDiv.classList.remove('hover');
+    if (infoDiv) infoDiv.classList.remove('hover');
+    if (subtitleDiv) subtitleDiv.classList.remove('hover');
   });
   card.addEventListener('click', () => {
     page.forEach(p => p.classList.remove('active'));
@@ -1035,9 +1047,22 @@ const nowPlayingBarNextButton = nowPlayingBar.querySelector('.button-next');
 const nowPlayingBarProgress = nowPlayingBar.querySelector('.now-playing-bar__progress');
 const musicPlayerPage = document.querySelector('.music-player-page');
 // 点击底部播放器歌曲封面，显示歌曲歌词
-nowPlayingBarCover.addEventListener('click', () => {
+const nowPlayingBarCoverElement = nowPlayingBar.querySelector('.now-playing-bar__cover');
+nowPlayingBarCoverElement.addEventListener('click', () => {
   musicPlayerPage.classList.add('active');
+  musicPlayerPage.classList.remove('closing');
   nowPlayingBar.classList.remove('active');
+});
+
+// 点击音乐播放器页眉收缩按钮，反向移动
+const musicPlayerPageShrinkButton = document.querySelector('.music-player-page__header-shrink');
+musicPlayerPageShrinkButton.addEventListener('click', () => {
+  musicPlayerPage.classList.remove('active');
+  musicPlayerPage.classList.add('closing');
+  setTimeout(() => {
+    musicPlayerPage.classList.remove('closing');
+    nowPlayingBar.classList.add('active');
+  }, 300);
 });
 // 创建进度条时间提示
 const progressTooltip = document.createElement('div');
@@ -1071,7 +1096,7 @@ nowPlayingBarLikeButton.addEventListener('click', (e) => {
 });
 
 // 播放歌曲函数
-function playSong(track, albumImage, trackList = null, index = null) {
+function playSong(track, albumImage, trackList = null, index = null, hideNowPlayingBar = false) {
   currentTrack = track;
   currentAlbumCover = albumImage;
 
@@ -1081,35 +1106,97 @@ function playSong(track, albumImage, trackList = null, index = null) {
     currentTrackIndex = index;
   }
 
-  console.log('playSong 调用, track:', track);
-  console.log('playSong 调用, albumImage:', albumImage);
-
   // 更新播放器信息
+  console.log('更新底部播放器信息');
+  console.log('nowPlayingBarTitle:', nowPlayingBarTitle);
+  console.log('nowPlayingBarArtist:', nowPlayingBarArtist);
+  console.log('nowPlayingBarCover:', nowPlayingBarCover);
+
   if (nowPlayingBarTitle) {
     nowPlayingBarTitle.textContent = track.name || '未知歌曲';
+    console.log('设置歌曲标题:', track.name);
+  } else {
+    console.error('找不到 nowPlayingBarTitle 元素');
   }
+
   if (nowPlayingBarArtist) {
     // 兼容不同的艺术家数据格式: ar 或 artists
     const artistNames = track.artists ? track.artists.map(a => a.name).join('/') :
                         track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
     nowPlayingBarArtist.textContent = artistNames;
-    console.log('艺术家名称:', artistNames);
+    console.log('设置艺术家:', artistNames);
+  } else {
+    console.error('找不到 nowPlayingBarArtist 元素');
   }
 
-  // 处理专辑封面图片
-  let coverImage = albumImage;
-  if (!coverImage && track.al?.picUrl) {
+  let coverImage = null;
+  if (track.picUrl) {
+    coverImage = track.picUrl;
+  }
+  else if (track.al?.picUrl) {
     coverImage = track.al.picUrl;
-  } else if (!coverImage && track.album?.picUrl) {
+  }
+  else if (track.album?.picUrl) {
     coverImage = track.album.picUrl;
-  } else if (!coverImage && track.art?.picUrl) {
+  }
+  else if (track.art?.picUrl) {
     coverImage = track.art.picUrl;
   }
-
+  else if (albumImage) {
+    coverImage = albumImage;
+  }
+  
   if (nowPlayingBarCover && coverImage) {
     nowPlayingBarCover.src = coverImage;
     console.log('设置封面:', coverImage);
+  } else {
+    console.error('找不到 nowPlayingBarCover 元素或 coverImage 为空');
   }
+
+  // 更新 music-player-page 的信息
+  const musicPlayerPageTitle = document.querySelector('.music-player-page__title');
+  const musicPlayerPageCover = document.querySelector('.music-player-page__cover img');
+  const musicPlayerPageCoverDiv = document.querySelector('.music-player-page__cover');
+  const musicPlayerPageArtist = document.querySelector('.music-player-page__info-artist');
+  const musicPlayerPageAlbum = document.querySelector('.music-player-page__info-album');
+
+  if (musicPlayerPageTitle) {
+    musicPlayerPageTitle.textContent = track.name || '未知歌曲';
+  }
+
+  if (musicPlayerPageCover && coverImage) {
+    musicPlayerPageCover.src = coverImage;
+  }
+
+  // 停止封面旋转,等待播放按钮点击
+  if (musicPlayerPageCover) {
+    musicPlayerPageCover.classList.remove('active');
+  }
+
+  if (musicPlayerPageCoverDiv) {
+    musicPlayerPageCoverDiv.classList.remove('active');
+  }
+
+
+
+  if (musicPlayerPageArtist) {
+
+    const artistNames = '歌手：' + (track.artists ? track.artists.map(a => a.name).join('/') :
+
+                        track.ar ? track.ar.map(a => a.name).join('/') : '未知歌手');
+    musicPlayerPageArtist.textContent = artistNames;
+  }
+
+
+
+  if (musicPlayerPageAlbum) {
+
+    const albumName = '专辑：' + track.al?.name || track.album?.name || track.art?.name || '未知专辑';
+    musicPlayerPageAlbum.textContent = albumName;
+  }
+
+  // 更新音乐播放器页面的控制栏信息
+  updateMusicNowPlayingBar(track, coverImage);
 
   // 获取歌曲播放地址
   fetch(`http://localhost:3000/song/url/v1?id=${track.id}&level=exhigh`)
@@ -1120,10 +1207,23 @@ function playSong(track, albumImage, trackList = null, index = null) {
         const songUrl = res.data[0].url;
         audio.src = songUrl;
         audio.play().then(() => {
-          nowPlayingBar.classList.add('active');
+          // 如果不是在歌词页面，则显示底部播放器
+          if (!hideNowPlayingBar) {
+            nowPlayingBar.classList.add('active');
+          }
           nowPlayingBarPlayButton.classList.remove('active');
           nowPlayingBarPauseButton.classList.add('active');
-          nowPlayingBarCover.classList.add('active');
+          if (nowPlayingBarCover) nowPlayingBarCover.classList.add('active');
+
+          // 开始 music-player-page 的封面旋转
+          const musicPlayerPageCover = document.querySelector('.music-player-page__cover img');
+          const musicPlayerPageCoverDiv = document.querySelector('.music-player-page__cover');
+          if (musicPlayerPageCover) {
+            musicPlayerPageCover.classList.add('active');
+          }
+          if (musicPlayerPageCoverDiv) {
+            musicPlayerPageCoverDiv.classList.add('active');
+          }
         }).catch(err => {
           console.error('播放失败:', err);
         });
@@ -1140,7 +1240,10 @@ function playPrevSong() {
   if (currentTrackList.length > 0) {
     currentTrackIndex = (currentTrackIndex - 1 + currentTrackList.length) % currentTrackList.length;
     const prevTrack = currentTrackList[currentTrackIndex];
-    playSong(prevTrack, currentAlbumCover, currentTrackList, currentTrackIndex);
+    const musicPlayerPage = document.querySelector('.music-player-page');
+    const isMusicPlayerPageActive = musicPlayerPage && musicPlayerPage.classList.contains('active');
+
+    playSong(prevTrack, currentAlbumCover, currentTrackList, currentTrackIndex, isMusicPlayerPageActive);
   }
 }
 
@@ -1149,7 +1252,10 @@ function playNextSong() {
   if (currentTrackList.length > 0) {
     currentTrackIndex = (currentTrackIndex + 1) % currentTrackList.length;
     const nextTrack = currentTrackList[currentTrackIndex];
-    playSong(nextTrack, currentAlbumCover, currentTrackList, currentTrackIndex);
+    const musicPlayerPage = document.querySelector('.music-player-page');
+    const isMusicPlayerPageActive = musicPlayerPage && musicPlayerPage.classList.contains('active');
+
+    playSong(nextTrack, currentAlbumCover, currentTrackList, currentTrackIndex, isMusicPlayerPageActive);
   }
 }
 
@@ -1158,7 +1264,21 @@ nowPlayingBarPlayButton.addEventListener('click', () => {
   audio.play();
   nowPlayingBarPlayButton.classList.remove('active');
   nowPlayingBarPauseButton.classList.add('active');
-  nowPlayingBarCover.classList.add('active');
+  if (nowPlayingBarCover) nowPlayingBarCover.classList.add('active');
+
+  // 开始 music-player-page 的封面旋转
+  const musicPlayerPageCover = document.querySelector('.music-player-page__cover img');
+  const musicPlayerPageCoverDiv = document.querySelector('.music-player-page__cover');
+  if (musicPlayerPageCover) {
+    musicPlayerPageCover.classList.add('active');
+  }
+  if (musicPlayerPageCoverDiv) {
+    musicPlayerPageCoverDiv.classList.add('active');
+  }
+
+  // 同步更新 music-now-playing-bar 的状态
+  if (musicNowPlayingBarPlayButton) musicNowPlayingBarPlayButton.classList.add('active');
+  if (musicNowPlayingBarPauseButton) musicNowPlayingBarPauseButton.classList.remove('active');
 });
 
 // 暂停按钮点击事件
@@ -1166,14 +1286,38 @@ nowPlayingBarPauseButton.addEventListener('click', () => {
   audio.pause();
   nowPlayingBarPauseButton.classList.remove('active');
   nowPlayingBarPlayButton.classList.add('active');
-  nowPlayingBarCover.classList.remove('active');
+  if (nowPlayingBarCover) nowPlayingBarCover.classList.remove('active');
+
+  // 停止 music-player-page 的封面旋转
+  const musicPlayerPageCover = document.querySelector('.music-player-page__cover img');
+  const musicPlayerPageCoverDiv = document.querySelector('.music-player-page__cover');
+  if (musicPlayerPageCover) {
+    musicPlayerPageCover.classList.remove('active');
+  }
+  if (musicPlayerPageCoverDiv) {
+    musicPlayerPageCoverDiv.classList.remove('active');
+  }
+
+  // 同步更新 music-now-playing-bar 的状态
+  if (musicNowPlayingBarPlayButton) musicNowPlayingBarPlayButton.classList.remove('active');
+  if (musicNowPlayingBarPauseButton) musicNowPlayingBarPauseButton.classList.add('active');
 });
 
 // 音频播放结束事件
 audio.addEventListener('ended', () => {
   nowPlayingBarPauseButton.classList.remove('active');
   nowPlayingBarPlayButton.classList.add('active');
-  nowPlayingBarCover.classList.remove('active');
+  if (nowPlayingBarCover) nowPlayingBarCover.classList.remove('active');
+
+  // 停止 music-player-page 的封面旋转
+  const musicPlayerPageCover = document.querySelector('.music-player-page__cover img');
+  const musicPlayerPageCoverDiv = document.querySelector('.music-player-page__cover');
+  if (musicPlayerPageCover) {
+    musicPlayerPageCover.classList.remove('active');
+  }
+  if (musicPlayerPageCoverDiv) {
+    musicPlayerPageCoverDiv.classList.remove('active');
+  }
 
   // 自动播放下一首
   playNextSong();
@@ -1183,6 +1327,8 @@ audio.addEventListener('ended', () => {
 audio.addEventListener('timeupdate', () => {
   if (audio.duration > 0) {
     const progress = (audio.currentTime / audio.duration) * 100;
+
+    // 更新 now-playing-bar 的进度条
     if (nowPlayingBarProgress) {
       nowPlayingBarProgress.style.setProperty('--progress', `${progress}%`);
 
@@ -1192,6 +1338,20 @@ audio.addEventListener('timeupdate', () => {
       progressTooltip.textContent = `${currentTimeStr} / ${durationStr}`;
       progressTooltip.style.left = `${progress}%`;
     }
+
+    // 更新 music-now-playing-bar 的进度条
+    if (musicNowPlayingBarProgress) {
+      musicNowPlayingBarProgress.style.setProperty('--progress', `${progress}%`);
+
+      // 更新时间提示
+      const musicProgressTooltip = musicNowPlayingBarProgress.querySelector('.progress-tooltip');
+      if (musicProgressTooltip) {
+        const currentTimeStr = formatDuration(audio.currentTime * 1000);
+        const durationStr = formatDuration(audio.duration * 1000);
+        musicProgressTooltip.textContent = `${currentTimeStr} / ${durationStr}`;
+        musicProgressTooltip.style.left = `${progress}%`;
+      }
+    }
   }
 });
 
@@ -1199,6 +1359,9 @@ audio.addEventListener('timeupdate', () => {
 audio.addEventListener('loadedmetadata', () => {
   if (nowPlayingBarProgress) {
     nowPlayingBarProgress.style.setProperty('--progress', '0%');
+  }
+  if (musicNowPlayingBarProgress) {
+    musicNowPlayingBarProgress.style.setProperty('--progress', '0%');
   }
 });
 
@@ -1227,3 +1390,437 @@ if (nowPlayingBarNextButton) {
     playNextSong();
   });
 }
+
+// 歌词页面（music-player-page）
+const musicPlayerPageHeaderShrink = document.querySelector('.music-player-page__header-shrink');
+const musicPlayerPageCover = document.querySelector('.music-player-page__cover');
+const musicPlayerPageArticle = document.querySelector('.music-player-page__article');
+
+// 保持封面圆形
+function updateCoverSize() {
+  if (musicPlayerPageCover && musicPlayerPageArticle) {
+    // 确保宽度和高度保持一致，保持圆形
+    const coverWidth = getComputedStyle(musicPlayerPageCover).width;
+    musicPlayerPageCover.style.height = coverWidth;
+  }
+}
+
+// 窗口大小变化时更新封面尺寸
+window.addEventListener('resize', updateCoverSize);
+
+// 音乐播放器页面打开动画结束后更新封面尺寸
+musicPlayerPage.addEventListener('animationend', (e) => {
+  if (e.animationName === 'slideUp') {
+    updateCoverSize();
+  }
+});
+
+// 音乐播放器页面的控制栏 (music-now-playing-bar)
+const musicNowPlayingBar = document.querySelector('.music-now-playing-bar');
+const musicNowPlayingBarCover = musicNowPlayingBar?.querySelector('.now-playing-bar__cover img');
+const musicNowPlayingBarTitle = musicNowPlayingBar?.querySelector('.music-now-playing-bar__title');
+const musicNowPlayingBarArtist = musicNowPlayingBar?.querySelector('.music-now-playing-bar__artist');
+const musicNowPlayingBarPlayButton = musicNowPlayingBar?.querySelector('.music-now-playing-bar__play');
+const musicNowPlayingBarPauseButton = musicNowPlayingBar?.querySelector('.music-now-playing-bar__pause');
+const musicNowPlayingBarPrevButton = musicNowPlayingBar?.querySelector('.music-now-playing-bar__prev');
+const musicNowPlayingBarNextButton = musicNowPlayingBar?.querySelector('.music-now-playing-bar__next');
+const musicNowPlayingBarLikeButton = musicNowPlayingBar?.querySelector('.button-like');
+
+// 播放按钮
+if (musicNowPlayingBarPlayButton) {
+  musicNowPlayingBarPlayButton.addEventListener('click', () => {
+    audio.play();
+    musicNowPlayingBarPlayButton.classList.remove('active');
+    musicNowPlayingBarPauseButton.classList.add('active');
+    if (nowPlayingBarPlayButton) nowPlayingBarPlayButton.classList.remove('active');
+    if (nowPlayingBarPauseButton) nowPlayingBarPauseButton.classList.add('active');
+    if (nowPlayingBarCover) nowPlayingBarCover.classList.add('active');
+    // 开始 music-player-page 的封面旋转
+    const musicPlayerPageCover = document.querySelector('.music-player-page__cover img');
+    const musicPlayerPageCoverDiv = document.querySelector('.music-player-page__cover');
+    if (musicPlayerPageCover) {
+      musicPlayerPageCover.classList.add('active');
+    }
+    if (musicPlayerPageCoverDiv) {
+      musicPlayerPageCoverDiv.classList.add('active');
+    }
+  });
+}
+
+// 暂停按钮
+if (musicNowPlayingBarPauseButton) {
+  musicNowPlayingBarPauseButton.addEventListener('click', () => {
+    audio.pause();
+    musicNowPlayingBarPauseButton.classList.remove('active');
+    musicNowPlayingBarPlayButton.classList.add('active');
+    if (nowPlayingBarPlayButton) nowPlayingBarPlayButton.classList.add('active');
+    if (nowPlayingBarPauseButton) nowPlayingBarPauseButton.classList.remove('active');
+    if (nowPlayingBarCover) nowPlayingBarCover.classList.remove('active');
+    // 停止 music-player-page 的封面旋转
+    const musicPlayerPageCover = document.querySelector('.music-player-page__cover img');
+    const musicPlayerPageCoverDiv = document.querySelector('.music-player-page__cover');
+    if (musicPlayerPageCover) {
+      musicPlayerPageCover.classList.remove('active');
+    }
+    if (musicPlayerPageCoverDiv) {
+      musicPlayerPageCoverDiv.classList.remove('active');
+    }
+  });
+}
+
+// 上一首按钮
+if (musicNowPlayingBarPrevButton) {
+  musicNowPlayingBarPrevButton.addEventListener('click', () => {
+    playPrevSong();
+  });
+}
+
+// 下一首按钮
+if (musicNowPlayingBarNextButton) {
+  musicNowPlayingBarNextButton.addEventListener('click', () => {
+    playNextSong();
+  });
+}
+
+// 喜欢按钮
+  if (musicNowPlayingBarLikeButton) {
+    musicNowPlayingBarLikeButton.like = '♡';
+    musicNowPlayingBarLikeButton.addEventListener('click', () => {
+      musicNowPlayingBarLikeButton.like = musicNowPlayingBarLikeButton.like === '♡' ? '❤' : '♡';
+      musicNowPlayingBarLikeButton.textContent = musicNowPlayingBarLikeButton.like;
+      musicNowPlayingBarLikeButton.classList.toggle('button-like--active');
+    });
+  }
+
+  // 用户信息显示
+  const userAvatar = document.getElementById('userAvatar');
+  const userName = document.getElementById('userName');
+  const userVip = document.getElementById('userVip');
+
+  // 更新用户信息显示
+  function updateUserInfo(user) {
+    if (user && user.profile) {
+      userName.textContent = user.profile.nickname || '用户';
+      if (userAvatar) {
+        userAvatar.querySelector('img').src = user.profile.avatarUrl || '图片/用户头像.png';
+      }
+      if (userVip) {
+        userVip.style.display = user.vipType ? 'block' : 'none';
+      }
+    } else {
+      userName.textContent = '未登录';
+      if (userAvatar) {
+        userAvatar.querySelector('img').src = '图片/用户头像.png';
+      }
+      if (userVip) {
+        userVip.style.display = 'none';
+      }
+    }
+  }
+
+  // 登录弹窗
+  const loginModal = document.getElementById('loginModal');
+  const loginModalClose = document.getElementById('loginModalClose');
+  const userAvatarElement = document.getElementById('userAvatar');
+  const userNameElement = document.getElementById('userName');
+
+  // 显示登录弹窗
+  function showLoginModal() {
+    loginModal.classList.add('active');
+  }
+
+  // 隐藏登录弹窗
+  function hideLoginModal() {
+    loginModal.classList.remove('active');
+  }
+
+  // 点击用户头像或用户名显示登录弹窗
+  if (userAvatarElement) {
+    userAvatarElement.addEventListener('click', showLoginModal);
+  }
+  if (userNameElement) {
+    userNameElement.addEventListener('click', showLoginModal);
+  }
+
+  // 关闭登录弹窗
+  if (loginModalClose) {
+    loginModalClose.addEventListener('click', hideLoginModal);
+  }
+
+  // 点击弹窗外部关闭
+  loginModal.addEventListener('click', (e) => {
+    if (e.target === loginModal) {
+      hideLoginModal();
+    }
+  });
+
+  // 登录功能
+  const phoneInput = document.getElementById('phone');
+  const countryCode = document.getElementById('countryCode');
+  const loginSubmit = document.getElementById('loginSubmit');
+
+  // 发送验证码
+  async function sendCaptcha(phone, countryCode) {
+    try {
+      const response = await fetch(`http://localhost:3000/captcha/sent?phone=${phone}&countrycode=${countryCode}`);
+      const data = await response.json();
+      console.log('发送验证码:', data);
+      if (data.code === 200) {
+        alert('验证码已发送');
+        return true;
+      } else {
+        alert(data.msg || '发送验证码失败');
+        return false;
+      }
+    } catch (error) {
+      console.error('发送验证码失败:', error);
+      alert('发送验证码失败');
+      return false;
+    }
+  }
+
+  // 登录
+  async function loginWithCaptcha(phone, countryCode, captcha) {
+    try {
+      const response = await fetch(`http://localhost:3000/login/cellphone?phone=${phone}&countrycode=${countryCode}&captcha=${captcha}`);
+      const data = await response.json();
+      console.log('登录结果:', data);
+
+      if (data.code === 200) {
+        // 保存登录token和用户信息
+        if (data.token) {
+          localStorage.setItem('neteaseToken', data.token);
+          console.log('已保存登录token');
+        }
+        
+        // 登录成功，更新用户信息
+        updateUserInfo(data);
+        hideLoginModal();
+        alert('登录成功');
+        return true;
+      } else {
+        alert(data.msg || '登录失败');
+        return false;
+      }
+    } catch (error) {
+      console.error('登录失败:', error);
+      alert('登录失败: ' + error.message);
+      return false;
+    }
+  }
+
+  // 登录提交
+  if (loginSubmit) {
+    loginSubmit.addEventListener('click', async () => {
+      const phone = phoneInput.value.trim();
+      const countrycode = countryCode.value;
+
+      if (!phone) {
+        alert('请输入手机号');
+        return;
+      }
+
+      // 发送验证码
+      const captchaSent = await sendCaptcha(phone, countrycode);
+      if (!captchaSent) {
+        return;
+      }
+
+      // 等待用户输入验证码
+      setTimeout(() => {
+        const captcha = prompt('请输入验证码:');
+        if (captcha) {
+          loginWithCaptcha(phone, countrycode, captcha);
+        }
+      }, 1000);
+    });
+  }
+
+// 更新 music-now-playing-bar 的信息
+function updateMusicNowPlayingBar(track, coverImage) {
+  if (!musicNowPlayingBar) return;
+
+  if (musicNowPlayingBarTitle && track) {
+    musicNowPlayingBarTitle.textContent = track.name || '未知歌曲';
+  }
+
+  if (musicNowPlayingBarArtist && track) {
+    const artistNames = track.artists ? track.artists.map(a => a.name).join('/') :
+                        track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
+    musicNowPlayingBarArtist.textContent = artistNames;
+  }
+
+  if (musicNowPlayingBarCover && coverImage) {
+    musicNowPlayingBarCover.src = coverImage;
+  }
+}
+
+// music-now-playing-bar 的进度条
+const musicNowPlayingBarProgress = musicNowPlayingBar?.querySelector('.now-playing-bar__progress');
+
+// 创建进度条时间提示
+if (musicNowPlayingBarProgress) {
+  const musicProgressTooltip = document.createElement('div');
+  musicProgressTooltip.className = 'progress-tooltip';
+  musicNowPlayingBarProgress.appendChild(musicProgressTooltip);
+
+  // 鼠标经过进度条，显示时间提示
+  musicNowPlayingBarProgress.addEventListener('mousemove', (e) => {
+    if (audio.duration > 0) {
+      const rect = musicNowPlayingBarProgress.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = x / rect.width;
+      const time = percentage * audio.duration;
+      const timeStr = formatDuration(time * 1000);
+
+      musicProgressTooltip.textContent = timeStr;
+      musicProgressTooltip.style.left = `${percentage * 100}%`;
+    }
+  });
+
+  musicNowPlayingBarProgress.addEventListener('mouseleave', () => {
+    musicProgressTooltip.textContent = '';
+  });
+
+  // 点击进度条跳转
+  musicNowPlayingBarProgress.addEventListener('click', (e) => {
+    if (audio.duration > 0) {
+      const rect = musicNowPlayingBarProgress.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = x / rect.width;
+      audio.currentTime = percentage * audio.duration;
+    }
+  });
+}
+
+// 获取歌词函数
+async function fetchLyrics(trackId) {
+  try {
+    const response = await fetch(`http://localhost:3000/lyric?id=${trackId}`);
+    const data = await response.json();
+
+    if (data.lrc && data.lrc.lyric) {
+      return parseLyrics(data.lrc.lyric);
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('获取歌词失败:', error);
+    return null;
+  }
+}
+
+// 解析歌词
+function parseLyrics(lrcText) {
+  const lines = lrcText.split('\n');
+  const lyrics = [];
+
+  lines.forEach(line => {
+    const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+    if (match) {
+      const minutes = parseInt(match[1]);
+      const seconds = parseInt(match[2]);
+      const milliseconds = parseInt(match[3]);
+      const time = minutes * 60 + seconds + milliseconds / 1000;
+      const text = match[4].trim();
+
+      if (text) {
+        lyrics.push({ time, text });
+      }
+    }
+  });
+
+  return lyrics;
+}
+
+// 显示歌词
+function displayLyrics(lyrics) {
+  const lyricsContainer = document.querySelector('.music-player-page__lyrics');
+  if (!lyricsContainer) return;
+
+  lyricsContainer.innerHTML = '';
+
+  if (!lyrics || lyrics.length === 0) {
+    lyricsContainer.innerHTML = '<div class="music-player-page__lyric-line">暂无歌词</div>';
+    return;
+  }
+
+  lyrics.forEach((lyric, index) => {
+    const lyricLine = document.createElement('div');
+    lyricLine.className = 'music-player-page__lyric-line';
+    lyricLine.dataset.time = lyric.time;
+    lyricLine.dataset.index = index;
+    lyricLine.textContent = lyric.text;
+
+    lyricsContainer.appendChild(lyricLine);
+  });
+}
+
+// 在 playSong 函数中添加歌词获取
+const originalPlaySong = playSong;
+playSong = async function(track, albumImage, trackList = null, index = null, hideNowPlayingBar = false) {
+  // 调用原始的 playSong 函数
+  originalPlaySong(track, albumImage, trackList, index, hideNowPlayingBar);
+
+  // 获取并显示歌词
+  if (track && track.id) {
+    const lyrics = await fetchLyrics(track.id);
+    displayLyrics(lyrics);
+  }
+};
+
+// 歌词高亮和滚动
+let lyrics = [];
+
+// 监听音频播放进度更新歌词
+if (audio) {
+  audio.addEventListener('timeupdate', () => {
+    const currentTime = audio.currentTime;
+    updateCurrentLyric(currentTime);
+  });
+}
+
+// 更新当前歌词
+function updateCurrentLyric(currentTime) {
+  const lyricsContainer = document.querySelector('.music-player-page__lyrics');
+  if (!lyricsContainer) return;
+
+  const lyricLines = lyricsContainer.querySelectorAll('.music-player-page__lyric-line');
+  if (lyricLines.length === 0) return;
+
+  let currentIndex = -1;
+
+  for (let i = 0; i < lyricLines.length; i++) {
+    const lyricTime = parseFloat(lyricLines[i].dataset.time);
+
+    if (currentTime >= lyricTime) {
+      currentIndex = i;
+    } else {
+      break;
+    }
+  }
+
+  // 移除所有高亮
+  lyricLines.forEach(line => {
+    line.classList.remove('music-player-page__lyric-line--active');
+  });
+
+  // 添加当前歌词高亮
+  if (currentIndex >= 0) {
+    const currentLine = lyricLines[currentIndex];
+    currentLine.classList.add('music-player-page__lyric-line--active');
+
+    // 滚动到当前歌词
+    currentLine.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  }
+}
+
+// 修改 displayLyrics 函数以保存歌词数据
+const originalDisplayLyrics = displayLyrics;
+displayLyrics = function(lyricsData) {
+  lyrics = lyricsData || [];
+  originalDisplayLyrics(lyrics);
+};
