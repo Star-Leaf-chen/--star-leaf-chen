@@ -915,7 +915,9 @@ transition: all 0.3s ease;
   margin-top: 59%;
 
 }
-
+.release-card.playlist-card .subtitle.hover{
+  margin-top: 0;
+}
 .playlist-card .info.hover .subtitle {
   z-index: 5;
 }

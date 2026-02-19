@@ -136,6 +136,30 @@
     content: '';
     background-color: rgba(0, 0, 0, 0.099);
 }
+.button-list{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 18px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.2;
+}
+.button-list:hover{
+    opacity: 1;
+}
+.button-list img{
+width: 24px;
+
+height: 24px;
+display: block;
+opacity: 0.5;
+}
+.button-list:hover img{
+opacity: 0.8;
+}
 .now-playing-bar__progress{
     position: absolute;
     top: 0;

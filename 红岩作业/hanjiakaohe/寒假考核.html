@@ -102,7 +102,7 @@
           
           <div class="login-modal__agreement">
             <label>
-              <input type="checkbox" id="agreement" >
+              <input type="checkbox" id="agreement" class="login-modal__agreement-checkbox">
               同意《<a href="#">服务条款</a>》《<a href="#">隐私政策</a>》《<a href="#">儿童隐私政策</a>》
             </label>
           </div>
@@ -668,8 +668,29 @@
               </div>
             </div>
           </div>
+          <!-- 华语 -->
           <div class="module">
-
+            <div class="playlist-grid"></div>
+          </div>
+          <!-- 摇滚 -->
+          <div class="module">
+            <div class="playlist-grid"></div>
+          </div>
+          <!-- 民谣 -->
+          <div class="module">
+            <div class="playlist-grid"></div>
+          </div>
+          <!-- 电子 -->
+          <div class="module">
+            <div class="playlist-grid"></div>
+          </div>
+          <!-- 轻音乐 -->
+          <div class="module">
+            <div class="playlist-grid"></div>
+          </div>
+          <!-- 更多分类 -->
+          <div class="module">
+            <div style="padding: 40px; text-align: center; color: #666;">更多分类开发中...</div>
           </div>
         </div>
 
@@ -769,12 +790,18 @@
   </div>
   <div class="music-player-page">
     <div class="music-player-page__header">
-      <div class="music-player-page__header-shrink">></div>
-      <div>播放器模式</div>
-      <div class="header-nav-item music-player-page__header-item">⬜</div>
-      <div class="header-nav-item music-player-page__header-item">🗟</div>
-      <div class="header-nav-item music-player-page__header-item">🗖</div>
-      <div class="header-nav-item music-player-page__header-item">✕</div>
+      <div class="music-player-page__header-shrink">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </div>
+      <div class="music-player-page__header-right">
+        <span class="music-player-page__header-mode">播放器模式</span>
+        <div class="header-nav-item music-player-page__header-item">⬜</div>
+        <div class="header-nav-item music-player-page__header-item">🗟</div>
+        <div class="header-nav-item music-player-page__header-item">🗖</div>
+        <div class="header-nav-item music-player-page__header-item">✕</div>
+      </div>
     </div>
     <div class="music-player-page__article">
       <div class="music-player-page__cover"><img src="图片/推荐歌曲图23.jpg" alt="歌曲封面"></div>
@@ -814,6 +841,7 @@
       <button class="button-isPlaying active music-now-playing-bar__play">▶</button>
       <button class="button-isPlaying music-now-playing-bar__pause">||</button>
       <button class="button-next music-now-playing-bar__next"><img src="图片/下一首.png" alt="下一首"></button>
+      <button class="button-list"><img src="图片/播放列表.webp" alt="播放列表"></button>
       <!-- 播放、暂停等按钮 -->
     </div>
     <div class="now-playing-bar__options">
@@ -843,6 +871,7 @@
       <button class="button-isPlaying active">||</button>
       <button class="button-isPlaying">▶</button>
       <button class="button-next"><img src="图片/下一首.png" alt="下一首"></button>
+      <button class="button-list"><img src="图片/播放列表.webp" alt="播放列表"></button>
       <!-- 播放、暂停等按钮 -->
     </div>
     <div class="now-playing-bar__options">
