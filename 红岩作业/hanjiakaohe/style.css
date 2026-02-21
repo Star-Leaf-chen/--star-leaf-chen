@@ -1019,6 +1019,11 @@ transition: all 0.3s ease;
   background: rgb(249, 249, 249);
 
 }
+
+.login-modal__phone-container:hover{
+  border: 1px solid rgb(240, 243, 246);
+}
+
 .login-modal__countrycode-container {
   border-right: 1px solid #e0e0e0;
   min-width: 85px;
@@ -1097,7 +1102,23 @@ transition: all 0.3s ease;
   background: #ff4757;
   border-color: #ff4757;
 }
-
+.login-modal__password {
+  width: 100%;
+  padding: 14px 125px;
+  padding-left: 15px;
+  font-size: 15px;
+  outline: none;
+  background: transparent;
+  display: flex;
+  border: 1px solid #e0e0e0 ;   
+  border-radius: 26px;
+  overflow:hidden;
+  background: rgb(249,249,249);
+  margin-top: 10px;
+}
+.login-modal__password:hover{
+  border: none;
+}
 .login-modal__password-login {
   display: flex;
   justify-content: center;

@@ -1,23 +1,42 @@
-//播放次数（例如：12345678 -> 1234.5万）
+﻿// 全局变量：保存用户喜欢的歌曲ID列表
+let globalLikedSongs = [];
+
+// 播放次数（例如：12345678 -> 1234.5万）
 function formatPlayCount(count) {
   if (!count) return '0';
   if (count >= 10000) {
     return (count / 10000).toFixed(1) + '万';
   }
-  return count.toString();
+
+  return [a, b, c, d].map(function (n) {
+    return ((n < 0 ? n + 0x100000000 : n).toString(16).padStart(8, '0'));
+  }).join('');
 }
 
 // 获取请求头配置
 function getAuthHeaders() {
-  const token = localStorage.getItem('neteaseToken');
-  const cookie = localStorage.getItem('neteaseCookie');
   const headers = {};
-  if (token) {
-    headers['Cookie'] = `MUSIC_U=${token}`;
-  } else if (cookie) {
+  const cookie = localStorage.getItem('neteaseCookie');
+  if (cookie) {
     headers['Cookie'] = cookie;
   }
   return headers;
+}
+
+// 获取用户ID
+function getUserId() {
+  const userInfo = localStorage.getItem('neteaseUserInfo');
+  if (userInfo) {
+    try {
+      const parsed = JSON.parse(userInfo);
+      const userId = parsed.account?.id || parsed.profile?.userId || parsed.userId || parsed.id;
+      return userId;
+    } catch (e) {
+      console.error('解析用户信息失败:', e);
+    }
+  }
+  console.log('未找到用户信息');
+  return null;
 }
 
 //歌曲时长
@@ -29,13 +48,306 @@ function formatDuration(ms) {
   return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
+// 喜欢音乐
+async function likeMusic(id, like = true) {
+  try {
+    const response = await fetch(`http://localhost:3000/like?id=${id}&like=${like}`, {
+      credentials: 'include',
+      headers: getAuthHeaders()
+    });
+    const data = await response.json();
+    console.log(`${like ? '喜欢' : '取消喜欢'}音乐结果:`, data);
+    if (data.code === 200) {
+      console.log(`${like ? '喜欢' : '取消喜欢'}成功`);
+      // 更新全局喜欢列表
+      if (like) {
+        globalLikedSongs.push(id);
+      } else {
+        globalLikedSongs = globalLikedSongs.filter(songId => songId !== id);
+      }
+      console.log('更新后的全局喜欢列表:', globalLikedSongs);
+      return true;
+    } else {
+      console.error(`${like ? '喜欢' : '取消喜欢'}失败:`, data);
+
+      return false;
+    }
+  } catch (error) {
+    console.error('喜欢音乐请求失败:', error);
+    return false;
+  }
+}
+
+// 检查歌曲是否已被喜欢
+async function checkSongLikeStatus(ids) {
+  try {
+    const idsArray = Array.isArray(ids) ? ids : [ids];
+    const response = await fetch(`http://localhost:3000/song/like/check?ids=[${idsArray.join(',')}]`, {
+      credentials: 'include',
+      headers: getAuthHeaders()
+    });
+    const data = await response.json();
+    console.log('返回code:', data.code);
+    if (data.code === 200) {
+      console.log('喜欢的歌曲IDs:', data.ids);
+      return data.ids || [];
+    } else {
+      console.error('检查歌曲喜欢状态失败, code:', data.code, 'message:', data.message);
+      return [];
+    }
+  } catch (error) {
+    console.error('检查歌曲喜欢状态请求失败:', error);
+    return [];
+  }
+}
+
+// 获取用户喜欢的音乐列表
+async function getLikedMusicList(uid) {
+  try {
+    const response = await fetch(`http://localhost:3000/likelist?uid=${uid}`, {
+      credentials: 'include',
+      headers: getAuthHeaders()
+    });
+    const data = await response.json();
+    if (data.code === 200) {
+      // 更新全局喜欢列表
+      globalLikedSongs = data.ids || [];
+      console.log('已更新全局喜欢列表:', globalLikedSongs);
+      return globalLikedSongs;
+    } else {
+      console.error('获取喜欢列表失败, code:', data.code, 'message:', data.message);
+      return [];
+    }
+  } catch (error) {
+    console.error('获取喜欢列表请求失败:', error);
+    return [];
+  }
+}
+
+// 获取歌曲详情
+async function getSongDetail(ids) {
+  try {
+    const response = await fetch(`http://localhost:3000/song/detail?ids=${ids.join(',')}`);
+    const data = await response.json();
+
+    if (data.code === 200 && data.songs) {
+      // 过滤掉无效的歌曲数据
+      const validSongs = data.songs.filter(song => song && song.id);
+      return validSongs;
+    } else {
+      console.error('获取歌曲详情失败:', data);
+      return [];
+    }
+  } catch (error) {
+    console.error('获取歌曲详情请求失败:', error);
+    return [];
+  }
+}
+
+// 显示"我喜欢的音乐"列表
+async function displayLikedMusicList(likedIds) {
+  try {
+    const albumTracks = document.querySelector('.album-tracks');
+    if (!albumTracks) {
+      console.error('找不到歌曲列表容器');
+      return;
+    }
+
+    // 显示加载提示
+    albumTracks.innerHTML = '<div style="padding: 20px; text-align: center;">加载中...</div>';
+
+    // 批量获取歌曲详情（每次最多50首）
+    const batchSize = 50;
+    const allSongs = [];
+    const totalBatches = Math.ceil(likedIds.length / batchSize);
+
+    for (let i = 0; i < likedIds.length; i += batchSize) {
+      const batch = likedIds.slice(i, i + batchSize);
+      const batchNum = Math.floor(i / batchSize) + 1;
+      console.log(`=== 获取第 ${batchNum}/${totalBatches} 批歌曲, ID数量: ${batch.length}, 累计: ${allSongs.length} ===`);
+
+      const songs = await getSongDetail(batch);
+
+      console.log(`批次 ${batchNum} 返回歌曲数量: ${songs.length}`);
+      allSongs.push(...songs);
+      console.log(`累计歌曲数量: ${allSongs.length}`);
+    }
+
+    console.log(`=== 最终获取 ${allSongs.length} 首歌曲详情 ===`);
+
+    // 清空列表
+    albumTracks.innerHTML = '';
+
+    if (allSongs.length === 0) {
+      albumTracks.innerHTML = '<div style="padding: 20px; text-align: center;">暂无喜欢的音乐</div>';
+      return;
+    }
+
+    // 获取第一首歌曲的封面作为专辑封面
+    const firstSongCover = allSongs[0]?.al?.picUrl || '图片/歌单人头像.png';
+
+    // 创建歌单信息对象，用于播放
+    const playlistInfo = {
+      name: '我喜欢的音乐',
+      coverImgUrl: firstSongCover,
+      tracks: allSongs,
+      createTime: Date.now(),
+      creator: { nickname: '我' }
+    };
+
+    // 更新 albumAside 显示"我喜欢的音乐"信息
+    updateAlbumAside(playlistInfo);
+
+    // 显示歌曲列表
+    allSongs.forEach((track, index) => {
+      const trackDiv = document.createElement('div');
+      trackDiv.className = 'track';
+
+      // 格式化歌曲时长
+      const duration = formatDuration(track.dt || track.duration);
+      // 获取艺术家名称
+      const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
+      // 检查歌曲是否已被喜欢（这里所有歌曲都应该显示❤，因为是"我喜欢的音乐"）
+      const isLiked = true;
+      track.like = '❤';
+      trackDiv.innerHTML = `
+        <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
+        <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
+        <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
+        <div class="track__item track__like ${isLiked ? 'track__item-like' : ''}" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
+        <div class="track__item">${duration}</div>
+      `;
+      const trackLike = trackDiv.querySelector('.track__like');
+      const trackIndex = trackDiv.querySelector('.track__index');
+
+      // 添加鼠标悬停效果
+      trackDiv.addEventListener('mouseenter', () => {
+        trackDiv.style.backgroundColor = 'white';
+        trackIndex.textContent = '▶';
+        trackIndex.addEventListener('click', (e) => {
+          e.stopPropagation();
+          playSong(track, playlistInfo.coverImgUrl, playlistInfo.tracks, index);
+        });
+      });
+      trackDiv.addEventListener('mouseleave', () => {
+        trackDiv.style.backgroundColor = 'rgb(247, 246, 247)';
+        trackIndex.textContent = String(index + 1).padStart(2, '0');
+      });
+
+      // 添加双击事件
+      trackDiv.addEventListener('dblclick', () => {
+        playSong(track, playlistInfo.coverImgUrl, playlistInfo.tracks, index);
+      });
+
+      // 喜欢按钮事件
+      if (trackLike) {
+        trackLike.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const shouldLike = track.like === '♡';
+          const success = await likeMusic(track.id, shouldLike);
+          if (success) {
+            track.like = shouldLike ? '❤' : '♡';
+            trackLike.textContent = track.like;
+            trackLike.classList.toggle('track__item-like');
+          }
+        });
+      }
+
+      albumTracks.appendChild(trackDiv);
+    });
+
+
+  } catch (error) {
+    console.error('显示喜欢音乐列表失败:', error);
+    const albumTracks = document.querySelector('.album-tracks');
+    if (albumTracks) {
+      albumTracks.innerHTML = '<div style="padding: 20px; text-align: center;">加载失败，请稍后重试</div>';
+    }
+  }
+}
+
+// 显示空状态
+function displayEmptyLikedMusic() {
+  const albumTracks = document.querySelector('.album-tracks');
+  if (albumTracks) {
+    albumTracks.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;"><div style="font-size: 48px; margin-bottom: 20px;">♡</div><div>暂无喜欢的音乐</div></div>';
+  }
+}
+
+// 更新 albumAside 信息
+function updateAlbumAside(playlist) {
+  const albumAside = document.querySelector('.album-aside');
+  if (!albumAside) {
+    console.error('找不到 album-aside 元素');
+    return;
+  }
+
+  // 获取用户信息
+  const userInfo = localStorage.getItem('neteaseUserInfo');
+  let avatarUrl = '图片/歌单人头像.png';
+  let nickname = '我';
+  let createTimeStr = '2024-1-15';
+
+  if (userInfo) {
+    try {
+      const parsed = JSON.parse(userInfo);
+      avatarUrl = parsed.profile?.avatarUrl || avatarUrl;
+      nickname = parsed.profile?.nickname || '我';
+      createTimeStr = parsed.account?.createTime
+        ? new Date(parsed.account.createTime).toLocaleDateString()
+        : '2024-1-15';
+    } catch (e) {
+      console.error('解析用户信息失败:', e);
+    }
+  }
+
+  const coverImgUrl = playlist.coverImgUrl || '图片/歌单人头像.png';
+  const trackCount = playlist.tracks?.length || 0;
+
+  albumAside.innerHTML = `
+    <div class="album-aside">
+      <div class="album-aside__title">我喜欢的音乐</div>
+      <div class="album-aside__profile">${trackCount}首喜欢的音乐</div>
+      <div class="album-aside__info">
+        <div class="album-avatar"><img src="${avatarUrl}" alt=""></div>
+        <div class="album-aside__info-username">${nickname}</div>
+        <div class="album-aside__info-time">${createTimeStr}创建</div>
+      </div>
+      <div class="album-aside-button">
+        <button class="album-aside__button active">▶ 播放全部</button>
+        <button class="album-aside__button">收藏</button>
+        <button class="album-aside__button">下载</button>
+        <button class="album-aside__button">...</button>
+      </div>
+    </div>
+  `;
+
+  // 更新专辑封面图片
+  const albumImage = document.querySelector('.album-image');
+  if (albumImage) {
+    albumImage.src = coverImgUrl;
+  } else {
+    console.error('找不到 .album-image 元素');
+  }
+
+  // 添加"播放全部"按钮的事件
+  const playAllButton = albumAside.querySelector('.album-aside__button.active');
+  if (playAllButton && playlist.tracks && playlist.tracks.length > 0) {
+    playAllButton.addEventListener('click', () => {
+      playSong(playlist.tracks[0], playlist.coverImgUrl, playlist.tracks, 0);
+    });
+  }
+
+  console.log('已更新 album-aside 信息');
+}
+
 // 从图片URL提取主色调
 function extractColorFromImage(imageUrl) {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
 
-    img.onload = function() {
+    img.onload = function () {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
@@ -53,7 +365,7 @@ function extractColorFromImage(imageUrl) {
       });
     };
 
-    img.onerror = function() {
+    img.onerror = function () {
       resolve({
         light: 'rgb(74, 31, 31)',
         dark: 'rgb(44, 18, 18)'
@@ -148,7 +460,7 @@ function displaySearchResults(searchData) {
 
       // 处理艺术家名称
       const artistNames = song.artists ? song.artists.map(a => a.name).join('/') :
-                          song.ar ? song.ar.map(a => a.name).join('/') : '未知艺术家';
+        song.ar ? song.ar.map(a => a.name).join('/') : '未知艺术家';
 
       keywordSpan.textContent = `${song.name || '未知歌曲'} - ${artistNames}`;
 
@@ -157,7 +469,6 @@ function displaySearchResults(searchData) {
 
       resultItem.addEventListener('click', () => {
         console.log('播放搜索结果歌曲:', song);
-        console.log('歌曲对象完整数据:', JSON.stringify(song));
 
         // 处理专辑封面图片
         let albumImage = 'https://p3.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg';
@@ -286,14 +597,47 @@ const playlistPage = document.querySelector('.playlist-page');
 // 侧边导航栏点击事件
 asideNavItems.forEach((item, index) => {
   item.addEventListener('click', function () {
-    // 移除所有 aside__nav-item和 page 的 active 类
-    asideNavItems.forEach(i => i.classList.remove('active'));
-    page.forEach(p => p.classList.remove('active'));
-    playlistPage.classList.remove('active');
-    // 为当前page和点击的 item 添加 active 类
-    this.classList.add('active');
-    if (index < page.length) {
-      page[index].classList.add('active');
+    // 检查是否点击"我喜欢的音乐"
+    if (item.id === 'likedMusicItem') {
+      // 移除所有 active 类
+      asideNavItems.forEach(i => i.classList.remove('active'));
+      page.forEach(p => p.classList.remove('active'));
+
+      // 为当前 item 添加 active 类
+      this.classList.add('active');
+
+      // 显示 playlist-page
+      if (playlistPage) {
+        playlistPage.classList.add('active');
+
+        // 获取用户ID并调用接口
+        const uid = getUserId();
+        if (uid) {
+          getLikedMusicList(uid).then(async (likedIds) => {
+            console.log('获取到的喜欢音乐ID列表:', likedIds);
+            if (likedIds.length > 0) {
+              console.log(`共找到 ${likedIds.length} 首喜欢的音乐`);
+              // 显示"我喜欢的音乐"列表
+              displayLikedMusicList(likedIds);
+            } else {
+              console.log('暂无喜欢的音乐');
+              displayEmptyLikedMusic();
+            }
+          });
+        } else {
+          alert('请先登录');
+        }
+      }
+    } else {
+      // 移除所有 aside__nav-item和 page 的 active 类
+      asideNavItems.forEach(i => i.classList.remove('active'));
+      page.forEach(p => p.classList.remove('active'));
+      playlistPage.classList.remove('active');
+      // 为当前page和点击的 item 添加 active 类
+      this.classList.add('active');
+      if (index < page.length) {
+        page[index].classList.add('active');
+      }
     }
   });
 });
@@ -429,7 +773,7 @@ function renderHighQualityPlaylists(playlists, container) {
         // 获取歌单详情
         fetch(`http://localhost:3000/playlist/detail?id=${playlistId}`)
           .then(res => res.json())
-          .then(res => {
+          .then(async res => {
             const playlistDetail = res.playlist;
 
             // 处理歌单详情数据
@@ -439,6 +783,9 @@ function renderHighQualityPlaylists(playlists, container) {
 
               // 处理曲目列表数据
               if (albumTracks && playlistDetail.tracks && playlistDetail.tracks.length > 0) {
+                // 使用全局喜欢列表
+                const likedSongs = globalLikedSongs;
+
                 playlistDetail.tracks.forEach((track, index) => {
                   const trackDiv = document.createElement('div');
                   trackDiv.className = 'track';
@@ -446,12 +793,14 @@ function renderHighQualityPlaylists(playlists, container) {
                   const duration = formatDuration(track.dt || track.duration);
                   // 获取艺术家名称
                   const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
-                  track.like = track.like || '♡';
+                  // 检查歌曲是否已被喜欢
+                  const isLiked = likedSongs.includes(track.id);
+                  track.like = isLiked ? '❤' : '♡';
                   trackDiv.innerHTML = `
                     <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
                     <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
                     <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
-                    <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
+                    <div class="track__item track__like ${isLiked ? 'track__item-like' : ''}" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
                     <div class="track__item">${duration}</div>
                   `;
                   const trackLike = trackDiv.querySelector('.track__like');
@@ -474,11 +823,15 @@ function renderHighQualityPlaylists(playlists, container) {
                     playSong(track, playlistDetail.coverImgUrl, playlistDetail.tracks, index);
                   });
                   if (trackLike) {
-                    trackLike.addEventListener('click', (e) => {
+                    trackLike.addEventListener('click', async (e) => {
                       e.stopPropagation();
-                      track.like = track.like === '♡' ? '❤' : '♡';
-                      trackLike.textContent = track.like;
-                      trackLike.classList.toggle('track__item-like');
+                      const shouldLike = track.like === '♡';
+                      const success = await likeMusic(track.id, shouldLike);
+                      if (success) {
+                        track.like = shouldLike ? '❤' : '♡';
+                        trackLike.textContent = track.like;
+                        trackLike.classList.toggle('track__item-like');
+                      }
                     });
                   }
                   albumTracks.appendChild(trackDiv);
@@ -729,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   // 获取歌单详情
                   fetch(`http://localhost:3000/playlist/detail?id=${playlistId}`)
                     .then(res => res.json())
-                    .then(res => {
+                    .then(async res => {
                       console.log('歌单内部详情:', res);
                       const playlistDetail = res.playlist;
 
@@ -740,6 +1093,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         // 处理曲目列表数据
                         if (albumTracks && playlistDetail.tracks && playlistDetail.tracks.length > 0) {
+                          // 使用全局喜欢列表
+                          const likedSongs = globalLikedSongs;
+
+
                           playlistDetail.tracks.forEach((track, index) => {
                             const trackDiv = document.createElement('div');
                             trackDiv.className = 'track';
@@ -747,14 +1104,16 @@ document.addEventListener('DOMContentLoaded', function () {
                             const duration = formatDuration(track.dt || track.duration);
                             // 获取艺术家名称
                             const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
-                            track.like = track.like || '♡';
-                           trackDiv.innerHTML = `
-                        <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
-                        <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
-                        <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
-                        <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
-                        <div class="track__item">${duration}</div>
-                      `;
+                            // 检查歌曲是否已被喜欢
+                            const isLiked = likedSongs.includes(track.id);
+                            track.like = isLiked ? '❤' : '♡';
+                            trackDiv.innerHTML = `
+                              <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
+                              <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
+                              <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
+                              <div class="track__item track__like ${isLiked ? 'track__item-like' : ''}" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
+                              <div class="track__item">${duration}</div>
+                            `;
                             const trackLike = trackDiv.querySelector('.track__like');
                             const trackIndex = trackDiv.querySelector('.track__index');
                             // 添加鼠标悬停效果
@@ -775,11 +1134,15 @@ document.addEventListener('DOMContentLoaded', function () {
                               playSong(track, playlistDetail.coverImgUrl, playlistDetail.tracks, index);
                             });
                             if (trackLike) {
-                              trackLike.addEventListener('click', (e) => {
+                              trackLike.addEventListener('click', async (e) => {
                                 e.stopPropagation(); // 防止触发track的点击事件
-                                track.like = track.like === '♡' ? '❤' : '♡';
-                                trackLike.textContent = track.like;
-                                trackLike.classList.toggle('track__item-like');
+                                const shouldLike = track.like === '♡';
+                                const success = await likeMusic(track.id, shouldLike);
+                                if (success) {
+                                  track.like = shouldLike ? '❤' : '♡';
+                                  trackLike.textContent = track.like;
+                                  trackLike.classList.toggle('track__item-like');
+                                }
                               });
                             }
                             albumTracks.appendChild(trackDiv);
@@ -861,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   // 获取歌单详情
                   fetch(`http://localhost:3000/playlist/detail?id=${playlistId}`)
                     .then(res => res.json())
-                    .then(res => {
+                    .then(async res => {
                       console.log('歌单内部详情:', res);
                       const playlistDetail = res.playlist;
 
@@ -872,6 +1235,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         // 处理曲目列表数据
                         if (albumTracks && playlistDetail.tracks && playlistDetail.tracks.length > 0) {
+                          // 使用全局喜欢列表
+                          const likedSongs = globalLikedSongs;
+
                           playlistDetail.tracks.forEach((track, index) => {
                             const trackDiv = document.createElement('div');
                             trackDiv.className = 'track';
@@ -879,14 +1245,16 @@ document.addEventListener('DOMContentLoaded', function () {
                             const duration = formatDuration(track.dt || track.duration);
                             // 获取艺术家名称
                             const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
-                            track.like = track.like || '♡';
+                            // 检查歌曲是否已被喜欢
+                            const isLiked = likedSongs.includes(track.id);
+                            track.like = isLiked ? '❤' : '♡';
                             trackDiv.innerHTML = `
-                        <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
-                        <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
-                        <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
-                        <div class="track__item track__like" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
-                        <div class="track__item">${duration}</div>
-                      `;
+                              <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
+                              <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
+                              <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
+                              <div class="track__item track__like ${isLiked ? 'track__item-like' : ''}" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
+                              <div class="track__item">${duration}</div>
+                            `;
                             const trackLike = trackDiv.querySelector('.track__like');
                             const trackIndex = trackDiv.querySelector('.track__index');
                             // 添加鼠标悬停效果
@@ -907,11 +1275,15 @@ document.addEventListener('DOMContentLoaded', function () {
                               playSong(track, playlistDetail.coverImgUrl, playlistDetail.tracks, index);
                             });
                             if (trackLike) {
-                              trackLike.addEventListener('click', (e) => {
+                              trackLike.addEventListener('click', async (e) => {
                                 e.stopPropagation(); // 防止触发track的点击事件
-                                track.like = track.like === '♡' ? '❤' : '♡';
-                                trackLike.textContent = track.like;
-                                trackLike.classList.toggle('track__item-like');
+                                const shouldLike = track.like === '♡';
+                                const success = await likeMusic(track.id, shouldLike);
+                                if (success) {
+                                  track.like = shouldLike ? '❤' : '♡';
+                                  trackLike.textContent = track.like;
+                                  trackLike.classList.toggle('track__item-like');
+                                }
                               });
                             }
                             albumTracks.appendChild(trackDiv);
@@ -1143,15 +1515,19 @@ nowPlayingBarProgress.addEventListener('mouseleave', () => {
 
 // 喜欢按钮事件
 nowPlayingBarLikeButton.like = '♡';
-nowPlayingBarLikeButton.addEventListener('click', (e) => {
+nowPlayingBarLikeButton.addEventListener('click', async (e) => {
   e.stopPropagation();
-  nowPlayingBarLikeButton.like = nowPlayingBarLikeButton.like === '♡' ? '❤' : '♡';
-  nowPlayingBarLikeButton.textContent = nowPlayingBarLikeButton.like;
-  nowPlayingBarLikeButton.classList.toggle('button-like--active');
+  const shouldLike = nowPlayingBarLikeButton.like === '♡';
+  const success = await likeMusic(currentTrack?.id, shouldLike);
+  if (success) {
+    nowPlayingBarLikeButton.like = shouldLike ? '❤' : '♡';
+    nowPlayingBarLikeButton.textContent = nowPlayingBarLikeButton.like;
+    nowPlayingBarLikeButton.classList.toggle('button-like--active');
+  }
 });
 
 // 播放歌曲函数
-function playSong(track, albumImage, trackList = null, index = null, hideNowPlayingBar = false) {
+async function playSong(track, albumImage, trackList = null, index = null, hideNowPlayingBar = false) {
   currentTrack = track;
   currentAlbumCover = albumImage;
 
@@ -1169,7 +1545,7 @@ function playSong(track, albumImage, trackList = null, index = null, hideNowPlay
   if (nowPlayingBarArtist) {
     // 兼容不同的艺术家数据格式: ar 或 artists
     const artistNames = track.artists ? track.artists.map(a => a.name).join('/') :
-                        track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
+      track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
     nowPlayingBarArtist.textContent = artistNames;
   }
 
@@ -1189,7 +1565,7 @@ function playSong(track, albumImage, trackList = null, index = null, hideNowPlay
   else if (albumImage) {
     coverImage = albumImage;
   }
-  
+
   if (nowPlayingBarCover && coverImage) {
     nowPlayingBarCover.src = coverImage;
   }
@@ -1224,7 +1600,7 @@ function playSong(track, albumImage, trackList = null, index = null, hideNowPlay
 
     const artistNames = '歌手：' + (track.artists ? track.artists.map(a => a.name).join('/') :
 
-                        track.ar ? track.ar.map(a => a.name).join('/') : '未知歌手');
+      track.ar ? track.ar.map(a => a.name).join('/') : '未知歌手');
     musicPlayerPageArtist.textContent = artistNames;
   }
 
@@ -1239,8 +1615,32 @@ function playSong(track, albumImage, trackList = null, index = null, hideNowPlay
   // 更新音乐播放器页面的控制栏信息
   updateMusicNowPlayingBar(track, coverImage);
 
+  // 检查当前歌曲是否已被喜欢，更新底部播放器喜欢按钮状态
+  const isLiked = globalLikedSongs.includes(track.id);
+  nowPlayingBarLikeButton.like = isLiked ? '❤' : '♡';
+  nowPlayingBarLikeButton.textContent = nowPlayingBarLikeButton.like;
+  if (isLiked) {
+    nowPlayingBarLikeButton.classList.add('button-like--active');
+  } else {
+    nowPlayingBarLikeButton.classList.remove('button-like--active');
+  }
+
+  // 同步更新 music-now-playing-bar 的喜欢按钮
+  if (musicNowPlayingBarLikeButton) {
+    musicNowPlayingBarLikeButton.like = isLiked ? '❤' : '♡';
+    musicNowPlayingBarLikeButton.textContent = musicNowPlayingBarLikeButton.like;
+    if (isLiked) {
+      musicNowPlayingBarLikeButton.classList.add('button-like--active');
+    } else {
+      musicNowPlayingBarLikeButton.classList.remove('button-like--active');
+    }
+  }
+
+
+
   // 获取歌曲播放地址
   fetch(`http://localhost:3000/song/url/v1?id=${track.id}&level=exhigh`, {
+    credentials: 'include',
     headers: getAuthHeaders()
   })
     .then(res => res.json())
@@ -1523,144 +1923,228 @@ if (musicNowPlayingBarNextButton) {
 }
 
 // 喜欢按钮
-  if (musicNowPlayingBarLikeButton) {
-    musicNowPlayingBarLikeButton.like = '♡';
-    musicNowPlayingBarLikeButton.addEventListener('click', () => {
-      musicNowPlayingBarLikeButton.like = musicNowPlayingBarLikeButton.like === '♡' ? '❤' : '♡';
+if (musicNowPlayingBarLikeButton) {
+  musicNowPlayingBarLikeButton.like = '♡';
+  musicNowPlayingBarLikeButton.addEventListener('click', async () => {
+    const shouldLike = musicNowPlayingBarLikeButton.like === '♡';
+    const success = await likeMusic(currentTrack?.id, shouldLike);
+    if (success) {
+      musicNowPlayingBarLikeButton.like = shouldLike ? '❤' : '♡';
       musicNowPlayingBarLikeButton.textContent = musicNowPlayingBarLikeButton.like;
       musicNowPlayingBarLikeButton.classList.toggle('button-like--active');
-    });
-  }
-
-  // 用户信息显示
-  const userAvatar = document.getElementById('userAvatar');
-  const userName = document.getElementById('userName');
-  const userVip = document.getElementById('userVip');
-
-  // 更新用户信息显示
-  function updateUserInfo(user) {
-    if (user && user.profile) {
-      userName.textContent = user.profile.nickname || '用户';
-      if (userAvatar) {
-        userAvatar.querySelector('img').src = user.profile.avatarUrl || '图片/用户头像.png';
-      }
-      if (userVip) {
-        userVip.style.display = user.vipType ? 'block' : 'none';
-      }
-    } else {
-      userName.textContent = '未登录';
-      if (userAvatar) {
-        userAvatar.querySelector('img').src = '图片/用户头像.png';
-      }
-      if (userVip) {
-        userVip.style.display = 'none';
-      }
-    }
-  }
-
-  // 登录弹窗
-  const loginModal = document.getElementById('loginModal');
-  const loginModalClose = document.getElementById('loginModalClose');
-  const userAvatarElement = document.getElementById('userAvatar');
-  const userNameElement = document.getElementById('userName');
-
-  // 显示登录弹窗
-  function showLoginModal() {
-    loginModal.classList.add('active');
-  }
-
-  // 隐藏登录弹窗
-  function hideLoginModal() {
-    loginModal.classList.remove('active');
-  }
-
-  // 点击用户头像或用户名显示登录弹窗
-  if (userAvatarElement) {
-    userAvatarElement.addEventListener('click', showLoginModal);
-  }
-  if (userNameElement) {
-    userNameElement.addEventListener('click', showLoginModal);
-  }
-
-  // 关闭登录弹窗
-  if (loginModalClose) {
-    loginModalClose.addEventListener('click', hideLoginModal);
-  }
-
-  // 点击弹窗外部关闭
-  loginModal.addEventListener('click', (e) => {
-    if (e.target === loginModal) {
-      hideLoginModal();
     }
   });
+}
 
-  // 登录功能
-  const phoneInput = document.getElementById('phone');
-  const countryCode = document.getElementById('countryCode');
-  const loginSubmit = document.getElementById('loginSubmit');
+// 用户信息显示
+const userAvatar = document.getElementById('userAvatar');
+const userName = document.getElementById('userName');
+const userVip = document.getElementById('userVip');
 
-  // 发送验证码
-  async function sendCaptcha(phone, countryCode) {
-    try {
-      const response = await fetch(`http://localhost:3000/captcha/sent?phone=${phone}&countrycode=${countryCode}`);
-      const data = await response.json();
-      console.log('发送验证码:', data);
-      if (data.code === 200) {
-        alert('验证码已发送');
-        return true;
-      } else {
-        alert(data.msg || '发送验证码失败');
-        return false;
-      }
-    } catch (error) {
-      console.error('发送验证码失败:', error);
-      alert('发送验证码失败');
-      return false;
+// 更新用户信息显示
+function updateUserInfo(user) {
+  if (user && user.profile) {
+    userName.textContent = user.profile.nickname || '用户';
+    if (userAvatar) {
+      userAvatar.querySelector('img').src = user.profile.avatarUrl || '图片/用户头像.png';
+    }
+    if (userVip) {
+      userVip.style.display = user.vipType ? 'block' : 'none';
+    }
+    // 保存用户信息到 localStorage
+    localStorage.setItem('neteaseUserInfo', JSON.stringify(user));
+  } else {
+    userName.textContent = '未登录';
+    if (userAvatar) {
+      userAvatar.querySelector('img').src = '图片/用户头像.png';
+    }
+    if (userVip) {
+      userVip.style.display = 'none';
     }
   }
+}
 
-  // 登录
-  async function loginWithCaptcha(phone, countryCode, captcha) {
-    try {
-      const response = await fetch(`http://localhost:3000/login/cellphone?phone=${phone}&countrycode=${countryCode}&captcha=${captcha}`);
-      const data = await response.json();
-      console.log('登录结果:', data);
+// 登录弹窗
+const loginModal = document.getElementById('loginModal');
+const loginModalClose = document.getElementById('loginModalClose');
+const userAvatarElement = document.getElementById('userAvatar');
+const userNameElement = document.getElementById('userName');
+const passwordLoginLink = document.getElementById('passwordLoginLink');
+const passwordContainer = document.getElementById('passwordContainer');
+const passwordInput = document.getElementById('password');
+let isPasswordMode = false;
 
-      if (data.code === 200) {
-        // 保存登录token和用户信息
-        if (data.token) {
-          localStorage.setItem('neteaseToken', data.token);
-          console.log('已保存登录token');
-        }
-        
-        // 登录成功，更新用户信息
-        updateUserInfo(data);
-        hideLoginModal();
-        alert('登录成功');
-        return true;
-      } else {
-        alert(data.msg || '登录失败');
-        return false;
-      }
-    } catch (error) {
-      console.error('登录失败:', error);
-      alert('登录失败: ' + error.message);
+// 显示登录弹窗
+function showLoginModal() {
+  loginModal.classList.add('active');
+  isPasswordMode = false;
+  passwordContainer.style.display = 'none';
+  loginSubmit.textContent = '验证码登录';
+}
+
+// 隐藏登录弹窗
+function hideLoginModal() {
+  loginModal.classList.remove('active');
+}
+
+// 密码登录切换
+if (passwordLoginLink) {
+  passwordLoginLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    isPasswordMode = true;
+    passwordContainer.style.display = 'block';
+    loginSubmit.textContent = '密码登录';
+  });
+}
+
+// 点击用户头像或用户名显示登录弹窗
+if (userAvatarElement) {
+  userAvatarElement.addEventListener('click', showLoginModal);
+}
+if (userNameElement) {
+  userNameElement.addEventListener('click', showLoginModal);
+}
+
+// 关闭登录弹窗
+if (loginModalClose) {
+  loginModalClose.addEventListener('click', hideLoginModal);
+}
+
+// 点击弹窗外部关闭
+loginModal.addEventListener('click', (e) => {
+  if (e.target === loginModal) {
+    hideLoginModal();
+  }
+});
+
+// 登录功能
+const phoneInput = document.getElementById('phone');
+const countryCode = document.getElementById('countryCode');
+const loginSubmit = document.getElementById('loginSubmit');
+
+// 发送验证码
+async function sendCaptcha(phone, countryCode) {
+  try {
+    const response = await fetch(`http://localhost:3000/captcha/sent?phone=${phone}&countrycode=${countryCode}`);
+    const data = await response.json();
+    console.log('发送验证码:', data);
+    if (data.code === 200) {
+      alert('验证码已发送');
+      return true;
+    } else {
+      alert(data.msg || '发送验证码失败');
       return false;
     }
+  } catch (error) {
+    console.error('发送验证码失败:', error);
+    alert('发送验证码失败');
+    return false;
   }
+}
 
-  // 登录提交
-  if (loginSubmit && !loginSubmit.hasLoginListener) {
-    loginSubmit.hasLoginListener = true;
-    loginSubmit.addEventListener('click', async () => {
-      const phone = phoneInput.value.trim();
-      const countrycode = countryCode.value;
+// 登录
+async function loginWithCaptcha(phone, countryCode, captcha) {
+  try {
+    const response = await fetch(`http://localhost:3000/login/cellphone?phone=${phone}&countrycode=${countryCode}&captcha=${captcha}`, {
+      credentials: 'include'
+    });
+    const data = await response.json();
 
-      if (!phone) {
-        alert('请输入手机号');
+    if (data.code === 200) {
+      // 保存登录信息
+      localStorage.setItem('neteaseUserInfo', JSON.stringify(data));
+      // 保存 cookie
+      if (data.cookie) {
+        localStorage.setItem('neteaseCookie', data.cookie);
+      }
+
+      // 登录成功，更新用户信息
+      updateUserInfo(data);
+      hideLoginModal();
+
+      // 加载用户的喜欢列表
+      const userId = data.account?.id || data.profile?.userId;
+      if (userId) {
+        getLikedMusicList(userId);
+      }
+
+      alert('登录成功');
+
+      return true;
+    } else {
+      alert(data.msg || '登录失败');
+      return false;
+    }
+  } catch (error) {
+    console.error('登录失败:', error);
+    alert('登录失败: ' + error.message);
+    return false;
+  }
+}
+
+// 密码登录
+async function loginWithPassword(phone, countryCode, password) {
+  try {
+    const response = await fetch(`http://localhost:3000/login/cellphone?phone=${phone}&countrycode=${countryCode}&password=${password}`, {
+      credentials: 'include'
+    });
+    const data = await response.json();
+    console.log('密码登录结果:', data);
+
+    if (data.code === 200) {
+      // 保存登录信息
+      localStorage.setItem('neteaseUserInfo', JSON.stringify(data));
+      console.log('已保存用户信息');
+
+      // 保存 cookie
+      if (data.cookie) {
+        localStorage.setItem('neteaseCookie', data.cookie);
+        console.log('已保存 cookie');
+      }
+
+      // 登录成功，更新用户信息
+      updateUserInfo(data);
+      hideLoginModal();
+
+      // 加载用户的喜欢列表
+      const userId = data.account?.id || data.profile?.userId;
+      if (userId) {
+        getLikedMusicList(userId);
+      }
+
+      alert('登录成功');
+      return true;
+    } else {
+      alert(data.msg || '登录失败');
+      return false;
+    }
+  } catch (error) {
+    console.error('登录失败:', error);
+    alert('登录失败: ' + error.message);
+    return false;
+  }
+}
+
+// 登录提交
+if (loginSubmit && !loginSubmit.hasLoginListener) {
+  loginSubmit.hasLoginListener = true;
+  loginSubmit.addEventListener('click', async () => {
+    const phone = phoneInput.value.trim();
+    const countrycode = countryCode.value;
+
+    if (!phone) {
+      alert('请输入手机号');
+      return;
+    }
+
+    if (isPasswordMode) {
+      const password = passwordInput.value.trim();
+      if (!password) {
+        alert('请输入密码');
         return;
       }
-
+      await loginWithPassword(phone, countrycode, password);
+    } else {
       // 发送验证码
       const captchaSent = await sendCaptcha(phone, countrycode);
       if (!captchaSent) {
@@ -1674,8 +2158,9 @@ if (musicNowPlayingBarNextButton) {
           loginWithCaptcha(phone, countrycode, captcha);
         }
       }, 1000);
-    });
-  }
+    }
+  });
+}
 
 // 更新 music-now-playing-bar 的信息
 function updateMusicNowPlayingBar(track, coverImage) {
@@ -1687,7 +2172,7 @@ function updateMusicNowPlayingBar(track, coverImage) {
 
   if (musicNowPlayingBarArtist && track) {
     const artistNames = track.artists ? track.artists.map(a => a.name).join('/') :
-                        track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
+      track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
     musicNowPlayingBarArtist.textContent = artistNames;
   }
 
@@ -1798,10 +2283,10 @@ function displayLyrics(lyrics) {
 }
 
 // 在 playSong 函数中添加歌词获取
-const originalPlaySong = playSong;
-playSong = async function(track, albumImage, trackList = null, index = null, hideNowPlayingBar = false) {
+const originalPlaySongWithLyrics = playSong;
+playSong = async function (track, albumImage, trackList = null, index = null, hideNowPlayingBar = false) {
   // 调用原始的 playSong 函数
-  originalPlaySong(track, albumImage, trackList, index, hideNowPlayingBar);
+  await originalPlaySongWithLyrics(track, albumImage, trackList, index, hideNowPlayingBar);
 
   // 获取并显示歌词
   if (track && track.id) {
@@ -1874,7 +2359,7 @@ function updateCurrentLyric(currentTime) {
 
 // 修改 displayLyrics 函数以保存歌词数据
 const originalDisplayLyrics = displayLyrics;
-displayLyrics = function(lyricsData) {
+displayLyrics = function (lyricsData) {
   lyrics = lyricsData || [];
   originalDisplayLyrics(lyrics);
 };
