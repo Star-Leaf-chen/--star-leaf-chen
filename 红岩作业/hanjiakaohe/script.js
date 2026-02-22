@@ -35,7 +35,6 @@ function getUserId() {
       console.error('解析用户信息失败:', e);
     }
   }
-  console.log('未找到用户信息');
   return null;
 }
 
@@ -48,6 +47,239 @@ function formatDuration(ms) {
   return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
+// 获取每日推荐歌单
+async function getRecommendResource() {
+  try {
+    const response = await fetch(`http://localhost:3000/recommend/resource`, {
+      credentials: 'include',
+      headers: getAuthHeaders()
+    });
+    const data = await response.json();
+    if (data.code === 200 && data.recommend) {
+      return data.recommend;
+    } else {
+      console.error('获取每日推荐歌单失败:', data);
+      return null;
+    }
+  } catch (error) {
+    console.error('每日推荐歌单请求失败:', error);
+    return null;
+  }
+}
+
+// 获取每日推荐歌曲
+async function getRecommendSongs() {
+  try {
+    const response = await fetch(`http://localhost:3000/recommend/songs`, {
+      credentials: 'include',
+      headers: getAuthHeaders()
+    });
+    const data = await response.json();
+    if (data.code === 200 && data.data && data.data.dailySongs) {
+      return data.data.dailySongs;
+    } else {
+      console.error('获取每日推荐歌曲失败:', data);
+      return null;
+    }
+  } catch (error) {
+    console.error('每日推荐歌曲请求失败:', error);
+    return null;
+  }
+}
+
+// 获取私人 FM
+async function getPersonalFm() {
+  try {
+    const response = await fetch(`http://localhost:3000/personal_fm`, {
+      credentials: 'include',
+      headers: getAuthHeaders()
+    });
+    const data = await response.json();
+    if (data.code === 200 && data.data) {
+      return data.data;
+    } else {
+      console.error('获取私人FM失败:', data);
+      return null;
+    }
+  } catch (error) {
+    console.error('私人FM请求失败:', error);
+    return null;
+  }
+}
+
+// 更新recommend-everyday卡片
+async function updateRecommendEverydayCards() {
+  const recommendData = await getRecommendResource();
+  if (!recommendData || recommendData.length === 0) {
+    console.error('没有获取到每日推荐数据');
+    return;
+  }
+
+  const cards = document.querySelectorAll('.recommend-everyday');
+  const updateCount = Math.min(cards.length, recommendData.length);
+
+  for (let i = 0; i < updateCount; i++) {
+    const card = cards[i];
+    const playlist = recommendData[i];
+
+    const img = card.querySelector('img');
+    const titleDiv = card.querySelector('.title');
+    const subtitleDiv = card.querySelector('.subtitle');
+
+    const songs = await getRecommendSongs();
+    const coverUrl = (songs && songs.length > 0 && songs[0].al) ? songs[0].al.picUrl : playlist.coverImgUrl || '图片/推荐歌曲图11.jpg';
+
+    if (img) img.src = coverUrl;
+    if (titleDiv) titleDiv.textContent = playlist.name;
+    if (subtitleDiv) subtitleDiv.textContent = playlist.creator?.nickname || '推荐歌单';
+
+    // 添加点击事件 - 获取并显示每日推荐歌曲
+    card.addEventListener('click', async () => {
+      if (songs && songs.length > 0) {
+        displayRecommendSongs(songs, playlist);
+      } else {
+        alert('获取每日推荐歌曲失败，请确保已登录');
+      }
+    });
+
+    await applyColorToCard(card, coverUrl);
+  }
+}
+
+// 更新personal-fm卡片
+async function updatePersonalFmCard() {
+  const fmData = await getPersonalFm();
+  if (!fmData || fmData.length === 0) {
+    console.error('没有获取到私人FM数据');
+    return;
+  }
+
+  const card = document.querySelector('.personal-fm');
+  if (!card) return;
+
+  const img = card.querySelector('img');
+  const titleDiv = card.querySelector('.title');
+  const subtitleDiv = card.querySelector('.subtitle');
+
+  const coverUrl = (fmData[0] && fmData[0].album) ? fmData[0].album.picUrl : '图片/推荐歌曲图12.jpg';
+
+  if (img) img.src = coverUrl;
+  if (titleDiv) titleDiv.textContent = fmData[0].name || '私人FM';
+  if (subtitleDiv) {
+    subtitleDiv.textContent = (fmData[0].artists && fmData[0].artists.map(a => a.name).join('/')) || '根据您的喜好推荐';
+    // 确保 subtitle 不添加 .hover 类
+    subtitleDiv.classList.remove('hover');
+  }
+
+  await applyColorToCard(card, coverUrl);
+
+  // 添加点击事件 - 播放FM歌曲
+  card.addEventListener('click', () => {
+    if (fmData.length > 0) {
+      playFmSong(fmData);
+    } else {
+      alert('获取私人FM失败，请确保已登录');
+    }
+  });
+}
+
+// 播放FM歌曲
+async function playFmSong(fmData) {
+  const currentIndex = 0;
+  const coverUrl = fmData[currentIndex].album?.picUrl || '图片/推荐歌曲图12.jpg';
+  playSong(fmData[currentIndex], coverUrl, fmData, currentIndex);
+}
+
+// 显示每日推荐歌曲
+function displayRecommendSongs(songs, playlist) {
+  const page = document.querySelectorAll('.page');
+  const playlistPage = document.querySelector('.playlist-page');
+
+  page.forEach(p => p.classList.remove('active'));
+  if (playlistPage) {
+    playlistPage.classList.add('active');
+
+    const albumImage = playlistPage.querySelector('.album-image');
+    const albumTitle = playlistPage.querySelector('.album-aside__title');
+    const albumProfile = playlistPage.querySelector('.album-aside__profile');
+    const albumInfo = playlistPage.querySelector('.album-aside__info');
+    const albumTracks = playlistPage.querySelector('.album-tracks');
+
+    const coverUrl = songs[0]?.al?.picUrl || playlist.coverImgUrl || '图片/推荐歌曲图11.jpg';
+    if (albumImage) albumImage.src = coverUrl;
+    if (albumTitle) albumTitle.textContent = playlist.name || '每日推荐';
+    if (albumProfile) albumProfile.textContent = playlist.description || '根据您的音乐口味生成的推荐';
+
+    const user = JSON.parse(localStorage.getItem('neteaseUserInfo') || '{}');
+    const userProfile = user.profile || user.account || {};
+    if (albumInfo) {
+      albumInfo.innerHTML = `<div class="album-avatar"><img src="${userProfile.avatarUrl || '图片/用户头像.png'}" alt=""></div>` +
+        `<div class="album-aside__info-username">${userProfile.nickname || '我'}</div>` +
+        `<div class="album-aside__info-time">每日推荐</div>`;
+    }
+
+    if (albumTracks) {
+      albumTracks.innerHTML = '';
+    }
+
+    if (albumTracks && songs.length > 0) {
+      const likedSongs = globalLikedSongs;
+
+      songs.forEach((track, index) => {
+        const trackDiv = document.createElement('div');
+        trackDiv.className = 'track';
+        const duration = formatDuration(track.dt || track.duration);
+        const artistNames = track.ar ? track.ar.map(a => a.name).join('/') : '未知艺术家';
+        const isLiked = likedSongs.includes(track.id);
+        track.like = isLiked ? '❤' : '♡';
+        trackDiv.innerHTML = `
+          <div class="track__item track__index">${String(index + 1).padStart(2, '0')}</div>
+          <div class="track__item track__title"><div class="track__item-img"><img src="${track.al ? track.al.picUrl : ''}" alt=""></div><div><span>${track.name || '未知歌曲'}</span><br><span class="track__item-artist">${artistNames}</span></div></div>
+          <div class="track__item track__album">${track.al ? track.al.name : '未知专辑'}</div>
+          <div class="track__item track__like ${isLiked ? 'track__item-like' : ''}" style="padding-left: 10px; cursor: pointer;">${track.like}</div>
+          <div class="track__item">${duration}</div>
+        `;
+
+        const trackLike = trackDiv.querySelector('.track__like');
+        const trackIndex = trackDiv.querySelector('.track__index');
+
+        trackDiv.addEventListener('mouseenter', () => {
+          trackDiv.style.backgroundColor = 'white';
+          trackIndex.textContent = '▶';
+          trackIndex.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playSong(track, coverUrl, songs, index);
+          });
+        });
+
+        trackDiv.addEventListener('mouseleave', () => {
+          trackDiv.style.backgroundColor = 'rgb(247, 246, 247)';
+          trackIndex.textContent = String(index + 1).padStart(2, '0');
+        });
+
+        trackDiv.addEventListener('dblclick', () => {
+          playSong(track, coverUrl, songs, index);
+        });
+
+        if (trackLike) {
+          trackLike.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const shouldLike = track.like === '♡';
+            const success = await likeMusic(track.id, shouldLike);
+            if (success) {
+              track.like = shouldLike ? '❤' : '♡';
+              trackLike.textContent = track.like;
+              trackLike.classList.toggle('track__item-like');
+            }
+          });
+        }
+
+        albumTracks.appendChild(trackDiv);
+      });
+    }
+  }
+}
+
 // 喜欢音乐
 async function likeMusic(id, like = true) {
   try {
@@ -56,16 +288,13 @@ async function likeMusic(id, like = true) {
       headers: getAuthHeaders()
     });
     const data = await response.json();
-    console.log(`${like ? '喜欢' : '取消喜欢'}音乐结果:`, data);
     if (data.code === 200) {
-      console.log(`${like ? '喜欢' : '取消喜欢'}成功`);
       // 更新全局喜欢列表
       if (like) {
         globalLikedSongs.push(id);
       } else {
         globalLikedSongs = globalLikedSongs.filter(songId => songId !== id);
       }
-      console.log('更新后的全局喜欢列表:', globalLikedSongs);
       return true;
     } else {
       console.error(`${like ? '喜欢' : '取消喜欢'}失败:`, data);
@@ -87,9 +316,7 @@ async function checkSongLikeStatus(ids) {
       headers: getAuthHeaders()
     });
     const data = await response.json();
-    console.log('返回code:', data.code);
     if (data.code === 200) {
-      console.log('喜欢的歌曲IDs:', data.ids);
       return data.ids || [];
     } else {
       console.error('检查歌曲喜欢状态失败, code:', data.code, 'message:', data.message);
@@ -112,7 +339,6 @@ async function getLikedMusicList(uid) {
     if (data.code === 200) {
       // 更新全局喜欢列表
       globalLikedSongs = data.ids || [];
-      console.log('已更新全局喜欢列表:', globalLikedSongs);
       return globalLikedSongs;
     } else {
       console.error('获取喜欢列表失败, code:', data.code, 'message:', data.message);
@@ -163,17 +389,11 @@ async function displayLikedMusicList(likedIds) {
 
     for (let i = 0; i < likedIds.length; i += batchSize) {
       const batch = likedIds.slice(i, i + batchSize);
-      const batchNum = Math.floor(i / batchSize) + 1;
-      console.log(`=== 获取第 ${batchNum}/${totalBatches} 批歌曲, ID数量: ${batch.length}, 累计: ${allSongs.length} ===`);
 
       const songs = await getSongDetail(batch);
 
-      console.log(`批次 ${batchNum} 返回歌曲数量: ${songs.length}`);
       allSongs.push(...songs);
-      console.log(`累计歌曲数量: ${allSongs.length}`);
     }
-
-    console.log(`=== 最终获取 ${allSongs.length} 首歌曲详情 ===`);
 
     // 清空列表
     albumTracks.innerHTML = '';
@@ -338,7 +558,6 @@ function updateAlbumAside(playlist) {
     });
   }
 
-  console.log('已更新 album-aside 信息');
 }
 
 // 从图片URL提取主色调
@@ -381,8 +600,21 @@ async function applyColorToCard(card, imageUrl) {
   const colors = await extractColorFromImage(imageUrl);
   const infoDiv = card.querySelector('.info');
   if (infoDiv) {
-    // 正常状态使用light，hover状态使用渐变色
+    // 正常状态使用light
     infoDiv.style.background = colors.light;
+    // 存储 hover 状态的渐变色
+    const hoverGradient = `linear-gradient(to top, ${colors.dark}, ${colors.light}, transparent)`;
+    infoDiv.dataset.hoverBackground = hoverGradient;
+
+    // 添加 mouseenter 事件处理
+    infoDiv.addEventListener('mouseenter', () => {
+      infoDiv.style.background = hoverGradient;
+    });
+
+    // 添加 mouseleave 事件处理
+    infoDiv.addEventListener('mouseleave', () => {
+      infoDiv.style.background = colors.light;
+    });
   }
   card.style.background = colors.light;
 }
@@ -418,14 +650,9 @@ headerInput.addEventListener('keypress', (e) => {
 
 // 执行搜索
 function performSearch(keywords) {
-  console.log('搜索关键词:', keywords);
-
   fetch(`http://localhost:3000/search?keywords=${encodeURIComponent(keywords)}`)
     .then(res => res.json())
     .then(res => {
-      if (res.result?.songs?.length > 0) {
-        console.log('第一首歌的数据:', res.result.songs[0]);
-      }
       displaySearchResults(res);
     })
     .catch(err => {
@@ -468,8 +695,6 @@ function displaySearchResults(searchData) {
       resultItem.appendChild(keywordSpan);
 
       resultItem.addEventListener('click', () => {
-        console.log('播放搜索结果歌曲:', song);
-
         // 处理专辑封面图片
         let albumImage = 'https://p3.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg';
         playSong(song, albumImage);
@@ -504,7 +729,6 @@ headerInput.placeholder = '   搜索音乐、歌词、歌手';
 fetch(`http://localhost:3000/search/default`)
   .then(res => res.json())
   .then(res => {
-    console.log('默认搜索关键词:', res);
     const showKeywords = res.data.showKeyword;
     headerInput.placeholder = showKeywords;
   });
@@ -516,7 +740,6 @@ fetch(`http://localhost:3000/search/hot`)
     return res.json();
   })
   .then(res => {
-    console.log('热搜列表:', res);
     if (res && res.result && res.result.hots && res.result.hots.length > 0) {
       const hotKeywords = res.result.hots;
 
@@ -551,13 +774,11 @@ fetch(`http://localhost:3000/search/hot`)
           // 点击热搜词执行搜索并播放第一首
           keywordItem.addEventListener('click', () => {
             const keyword = item.first;
-            console.log('点击热搜词:', keyword);
 
             // 执行搜索
             fetch(`http://localhost:3000/search?keywords=${encodeURIComponent(keyword)}`)
               .then(res => res.json())
               .then(res => {
-                console.log('热搜搜索结果:', res);
                 if (res.result && res.result.songs && res.result.songs.length > 0) {
                   const firstSong = res.result.songs[0];
 
@@ -614,13 +835,10 @@ asideNavItems.forEach((item, index) => {
         const uid = getUserId();
         if (uid) {
           getLikedMusicList(uid).then(async (likedIds) => {
-            console.log('获取到的喜欢音乐ID列表:', likedIds);
             if (likedIds.length > 0) {
-              console.log(`共找到 ${likedIds.length} 首喜欢的音乐`);
               // 显示"我喜欢的音乐"列表
               displayLikedMusicList(likedIds);
             } else {
-              console.log('暂无喜欢的音乐');
               displayEmptyLikedMusic();
             }
           });
@@ -676,7 +894,6 @@ async function fetchHighQualityPlaylists(cat = '全部', limit = 50) {
 
     const response = await fetch(url);
     const data = await response.json();
-    console.log(`精品歌单 (${cat}):`, data);
     return data;
   } catch (error) {
     console.error('获取精品歌单失败:', error);
@@ -697,7 +914,7 @@ function renderHighQualityPlaylists(playlists, container) {
     card.classList.add('playlist-card');
     card.dataset.id = playlist.id;
     card.innerHTML = `
-      <img src="${playlist.coverImgUrl || '图片/默认封面.jpg'}" alt="${playlist.name}">
+      <img src="${playlist.coverImgUrl || '图片/推荐歌曲图11.jpg'}" alt="${playlist.name}">
       <div class="play-count">${formatPlayCount(playlist.playCount)}</div>
       <div class="play-button">▶</div>
       <div class="info">
@@ -1009,13 +1226,18 @@ document.addEventListener('DOMContentLoaded', function () {
   new ReleaseListCarousel('releaseList2', 'scrollWrapper2', 'arrowLeft2', 'arrowRight2');
 });
 
+// 每日推荐歌单
+document.addEventListener('DOMContentLoaded', function () {
+  updateRecommendEverydayCards();
+  updatePersonalFmCard();
+});
+
 // 推荐歌单（动态）
 document.addEventListener('DOMContentLoaded', function () {
   const releaseScroll = document.querySelectorAll('.release-scroll');
   fetch(`http://localhost:3000/top/playlist`)
     .then(res => res.json())
     .then(res => {
-      console.log('推荐歌单:', res);
       if (res && res.playlists && res.playlists.length > 0) {
         // 获取 #releaseList2 中的两个 .release-scroll
         const releaseList2Scrolls = document.querySelectorAll('#releaseList2 .release-scroll');
@@ -1083,7 +1305,6 @@ document.addEventListener('DOMContentLoaded', function () {
                   fetch(`http://localhost:3000/playlist/detail?id=${playlistId}`)
                     .then(res => res.json())
                     .then(async res => {
-                      console.log('歌单内部详情:', res);
                       const playlistDetail = res.playlist;
 
                       // 处理歌单详情数据
@@ -1225,7 +1446,6 @@ document.addEventListener('DOMContentLoaded', function () {
                   fetch(`http://localhost:3000/playlist/detail?id=${playlistId}`)
                     .then(res => res.json())
                     .then(async res => {
-                      console.log('歌单内部详情:', res);
                       const playlistDetail = res.playlist;
 
                       // 处理歌单详情数据
@@ -2027,7 +2247,6 @@ async function sendCaptcha(phone, countryCode) {
   try {
     const response = await fetch(`http://localhost:3000/captcha/sent?phone=${phone}&countrycode=${countryCode}`);
     const data = await response.json();
-    console.log('发送验证码:', data);
     if (data.code === 200) {
       alert('验证码已发送');
       return true;
@@ -2089,17 +2308,14 @@ async function loginWithPassword(phone, countryCode, password) {
       credentials: 'include'
     });
     const data = await response.json();
-    console.log('密码登录结果:', data);
 
     if (data.code === 200) {
       // 保存登录信息
       localStorage.setItem('neteaseUserInfo', JSON.stringify(data));
-      console.log('已保存用户信息');
 
       // 保存 cookie
       if (data.cookie) {
         localStorage.setItem('neteaseCookie', data.cookie);
-        console.log('已保存 cookie');
       }
 
       // 登录成功，更新用户信息

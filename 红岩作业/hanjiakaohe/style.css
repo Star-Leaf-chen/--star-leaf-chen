@@ -631,6 +631,69 @@ header input:focus {
   background-color: rgb(247, 249, 252);
   box-shadow: 0 0 0 0;
 }
+.releaseScroll-first{
+  max-height: 280px;
+}
+.release-card.playlist-card .recommend-everyday,
+.release-card.playlist-card .personal-fm,
+.release-card.playlist-card .aidj,
+.release-card.playlist-card .others {
+  background: transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  transition: all 0.3s ease;
+
+}
+
+.release-card.playlist-card.recommend-everyday img,
+.release-card.playlist-card.personal-fm img,
+.release-card.playlist-card.aidj img,
+.release-card.playlist-card.others img {
+  width: 100%;
+  height: 75.7%;
+  object-fit: cover;
+  display: block;
+}
+.release-card.playlist-card.recommend-everyday .info,
+.release-card.playlist-card.personal-fm .info,
+.release-card.playlist-card.aidj .info,
+.release-card.playlist-card.others .info {
+  display: grid !important;
+  grid-template-rows: 1fr 1fr;
+  flex: 1;
+  position: absolute;
+  align-content: flex-end;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px;
+  color: white;
+  transition: all 0.3s ease;
+  height: 70px;
+  text-align: left;
+}
+.release-card.playlist-card.recommend-everyday .info.hover,
+.release-card.playlist-card.personal-fm .info.hover,
+.release-card.playlist-card.aidj .info.hover,
+.release-card.playlist-card.others .info.hover {
+  display: grid !important;
+  grid-template-rows: 1fr 1fr;
+  align-content: center;
+  height: 100%;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+.release-card.playlist-card.recommend-everyday .info .subtitle.hover,
+.release-card.playlist-card.personal-fm .info .subtitle.hover,
+.release-card.playlist-card.aidj .info .subtitle.hover,
+.release-card.playlist-card.others .info .subtitle.hover{
+  margin-top: 75%;
+}
 
 .release-title {
   font-size: 16px;
@@ -880,7 +943,7 @@ header input:focus {
   height: 100%;
   text-align: left;
   background: linear-gradient(to top, rgb(44, 18, 18), rgb(74, 31, 31), transparent);
-transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .playlist-card .title {
