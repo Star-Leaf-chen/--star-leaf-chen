@@ -53,11 +53,33 @@ aside ul:nth-child(3)>h5:nth-child(9) {
   width: 100%;
   height: auto;
 }
-
+.aside__nav-item{
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
 .aside__nav-item.active {
   border-radius: 12px;
   background-color: rgb(252, 61, 73);
   color: white;
+  
+}
+.aside__nav-item-icon{
+  display: none;
+  width: 25px;
+  height: 25px;
+  margin-right: 9px;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: rgb(123, 127, 140);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.aside__nav-item-icon.active,
+.aside__nav-item-icon.hover{
+display: flex;
 }
 
 ul {
@@ -68,7 +90,6 @@ ul {
 }
 
 li {
-  width: 80%;
   margin: 2px 0;
   padding: 10px;
   cursor: pointer;
@@ -76,9 +97,9 @@ li {
 
 li:hover {
   border-radius: 12px;
-  background-color: #e0e0e0;
-}
+  background-color: rgb(228, 232, 236);
 
+}
 article {
   display: flex;
   flex-direction: column;
@@ -648,6 +669,16 @@ header input:focus {
   z-index: 10;
   transition: all 0.3s ease;
 
+
+
+}
+
+.release-card.playlist-card.recommend-everyday .title,
+.release-card.playlist-card.personal-fm .title,
+.release-card.playlist-card.aidj .title,
+.release-card.playlist-card.others .title {
+  bottom: 230px;
+  font-size: 20px;
 }
 
 .release-card.playlist-card.recommend-everyday img,
@@ -693,6 +724,8 @@ header input:focus {
 .release-card.playlist-card.aidj .info .subtitle.hover,
 .release-card.playlist-card.others .info .subtitle.hover{
   margin-top: 75%;
+  display: flex;
+  flex-direction: column;
 }
 
 .release-title {
