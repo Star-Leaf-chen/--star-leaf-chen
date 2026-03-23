@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>level 2</title>
+</head>
+<body>
+    <script>
+const add10 = (x) => x + 10;
+const mul10 = (x) => x * 10;
+const add100 = (x) => x + 100; 
+// (10 + 100) * 10 + 10 = 1110
+//compose的作用就是组合函数，将函数串联起来执行，前一个函数的输出值是后一个函数的输入值
+//实现一个compose函数(提示reduce，有能力的话考虑一下兼容异步)
+function compose(...fns){
+    //(...args) - 接收任意数量的参数
+    return fns.reduce((acc, cur)=>(...args)=>acc(cur(...args)))
+}
+console.log(compose(add10, mul10, add100)(10));
+    </script>
+</body>
+</html>

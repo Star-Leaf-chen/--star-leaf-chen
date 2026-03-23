@@ -2927,84 +2927,116 @@ function displayLyrics(lyrics) {
   });
 }
 
-// 在 playSong 函数中添加歌词获取
+// ==================== 歌词同步显示功能 ====================
+
+/**
+ * 在 playSong 函数中添加歌词获取功能
+ * 使用装饰器模式，在原函数执行后额外获取歌词
+ */
 const originalPlaySongWithLyrics = playSong;
 playSong = async function (track, albumImage, trackList = null, index = null, hideNowPlayingBar = false) {
-  // 调用原始的 playSong 函数
+  // 先调用原始的 playSong 函数（播放音乐、更新UI等）
   await originalPlaySongWithLyrics(track, albumImage, trackList, index, hideNowPlayingBar);
 
-  // 获取并显示歌词
+  // 然后异步获取并显示歌词
   if (track && track.id) {
-    const lyrics = await fetchLyrics(track.id);
-    displayLyrics(lyrics);
+    try {
+      const lyrics = await fetchLyrics(track.id);
+      displayLyrics(lyrics);
+    } catch (error) {
+      console.error('歌词获取失败:', error);
+    }
   }
 };
 
-// 歌词高亮和滚动
+// 全局变量，用于存储歌词数据
 let lyrics = [];
 
-// 监听音频播放进度更新歌词
+/**
+ * 监听音频播放进度，实时更新歌词高亮
+ * timeupdate 事件：音频播放时持续触发（约每秒3-4次）
+ */
 if (audio) {
   audio.addEventListener('timeupdate', () => {
-    const currentTime = audio.currentTime;
-    updateCurrentLyric(currentTime);
+    const currentTime = audio.currentTime;  // 获取当前播放时间（秒）
+    updateCurrentLyric(currentTime);         // 更新歌词显示
   });
 }
 
-// 更新当前歌词
+/**
+ * 更新当前歌词的高亮状态和滚动位置
+ * @param {number} currentTime - 当前播放时间（秒）
+ */
 function updateCurrentLyric(currentTime) {
+  // 获取歌词容器元素
   const lyricsContainer = document.querySelector('.music-player-page__lyrics');
   if (!lyricsContainer) return;
 
+  // 获取所有歌词行元素
   const lyricLines = lyricsContainer.querySelectorAll('.music-player-page__lyric-line');
   if (lyricLines.length === 0) return;
 
+  // 找到当前时间对应的歌词行索引
   let currentIndex = -1;
 
+  // 遍历所有歌词行，找到最后一个时间点 <= 当前时间的歌词
+  // 因为歌词是按时间顺序排列的，所以可以提前break优化性能
   for (let i = 0; i < lyricLines.length; i++) {
-    const lyricTime = parseFloat(lyricLines[i].dataset.time);
+    const lyricTime = parseFloat(lyricLines[i].dataset.time);  // 从 data-time 属性获取歌词时间
 
     if (currentTime >= lyricTime) {
-      currentIndex = i;
+      currentIndex = i;  // 记录当前应该显示的歌词行
     } else {
-      break;
+      break;  // 后续歌词时间都大于当前时间，无需继续遍历
     }
   }
 
-  // 移除所有高亮
+  // 第一步：清除所有歌词的高亮状态和透明度
   lyricLines.forEach(line => {
     line.classList.remove('music-player-page__lyric-line--active');
     line.style.opacity = '1';
   });
 
-  // 添加当前歌词高亮
+  // 第二步：如果有当前歌词，则进行高亮和滚动处理
   if (currentIndex >= 0) {
     const currentLine = lyricLines[currentIndex];
+
+    // 添加高亮样式类
     currentLine.classList.add('music-player-page__lyric-line--active');
     currentLine.style.opacity = '1';
 
-    // 滚动到当前歌词
+    // 自动滚动到当前歌词行（平滑滚动，居中显示）
     currentLine.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center'
+      behavior: 'smooth',  // 平滑滚动动画
+      block: 'center'      // 将元素滚动到视口中心
     });
 
-    // 淡出所有歌词，距离当前行越远的越淡
+    // 第三步：实现渐变透明度效果（距离当前行越远的歌词越淡）
+    // 这可以让用户的注意力聚焦在当前歌词上
     lyricLines.forEach((line, index) => {
-      const distance = Math.abs(index - currentIndex);
+      const distance = Math.abs(index - currentIndex);  // 计算与当前行的距离
+
       if (index === currentIndex) {
+        // 当前行完全不透明
         line.style.opacity = '1';
       } else {
-        // 距离越远，透明度越低，最小值为0.1
+        // 其他行根据距离计算透明度
+        // 距离每增加1，透明度减少0.15（15%）
+        // Math.max(0.1, ...) 确保最小透明度为0.1，避免完全不可见
         line.style.opacity = Math.max(0.1, 1 - distance * 0.15);
       }
     });
   }
 }
 
-// 修改 displayLyrics 函数以保存歌词数据
+/**
+ * 修改 displayLyrics 函数以保存歌词数据到全局变量
+ * 使用装饰器模式，在原函数执行前先保存数据
+ */
 const originalDisplayLyrics = displayLyrics;
 displayLyrics = function (lyricsData) {
+  // 保存歌词数据到全局变量，供 timeupdate 事件使用
   lyrics = lyricsData || [];
+  // 调用原始函数渲染歌词到DOM
   originalDisplayLyrics(lyrics);
 };

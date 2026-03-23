@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>level 3 promise</title>
+</head>
+<body>
+    <p></p>
+    <script>
+//有async,是异步函数,还没有调用
+async function foo() {
+//②：同步调用,从主线立即输出start,
+  console.log("start");
+  await bar();//同步调用,③：然后调用bar(),输出bar,await会等待bar()执行完成,然后再继续执行
+  //放入微任务队列,在微任务执行队列中排在p2前面,
+  // ④：输出end
+  console.log("end");
+}
+//有async,是异步函数,还没有调用
+async function bar() {
+  console.log("bar");
+}
+
+console.log(1);//①：不是异步,同步主线程,不用进入异步任务队列,直接输出1
+//异步setTimeout,其回调函数被分发到宏任务Event Queue中,宏任务后执行
+//⑥：最后执行宏任务,输出time
+setTimeout(() => {
+  console.log("time");
+});
+//同步调用foo(),执行13行
+foo();
+//new Promise()中的函数会立即同步执行,它不属于任何异步
+new Promise((resolve) => {
+    //③；输出p1
+  console.log("p1");
+  resolve();
+  //继续向下,then被分发到微任务Event Queue,在微任务执行队列中end排在p2前面,先输出end
+}).then(() => {
+    //⑤ :输出p2
+  console.log("p2");
+});
+
+console.log(2);
+
+//给出代码执行流程分析和结果
+const p = document.querySelector('p');
+p.innerHTML = `执行流程分析：
+1. 主线程执行代码,输出1
+2. 异步setTimeout,其回调函数被分发到宏任务Event Queue中,宏任务后执行
+3. 同步调用foo(),执行13行
+4. 主线程执行代码,输出2
+5. 异步setTimeout,其回调函数被分发到宏任务Event Queue中,宏任务后执行
+6. 输出time`;
+
+/*结果：
+ 1
+ start
+ bar
+ p1
+ 2
+ end
+ p2
+ time */
+    </script>
+</body>
+</html>

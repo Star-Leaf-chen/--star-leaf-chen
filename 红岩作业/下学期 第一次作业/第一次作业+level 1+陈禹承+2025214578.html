@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>level 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <style>
+         /* 随手用ai美化了一下css */
+    </style>
+    <input type="text" class="debounce" placeholder="防抖:停止输入2s后显示内容">
+    <div class="text1"></div>
+    <input type="text" class="throttle" placeholder="节流:每2s显示一次内容">
+    <div class="text2"></div>
+    <script>
+
+        // 防抖（基于时间戳有点难）
+        const input1 = document.querySelector('.debounce');
+
+        const text1 = document.querySelector('.text1');
+        
+        function debounce(fn, delay) {
+            let lastExecTime = 0;  
+            let timer = null;      
+            
+            return function(...args) {
+                let now = Date.now();
+                
+
+                if (now - lastExecTime >= delay) {
+                    fn.apply(this, args);
+                    lastExecTime = now;
+                } else {
+
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        fn.apply(this, args);
+                        lastExecTime = Date.now();
+                    }, delay - (now - lastExecTime));
+                }
+            };
+        }
+        function handleInput() {
+            text1.innerHTML = input1.value;
+
+        }
+        input1.addEventListener('input', debounce(handleInput, 2000));
+       // 节流
+        const input2 = document.querySelector('.throttle');
+        const text2 = document.querySelector('.text2');
+        function throttle(fn, delay) {
+            let lastTime = 0;
+            return function(...args) {
+                let now = Date.now();
+                if (now - lastTime >= delay) {
+                    fn.apply(this, args);
+                    lastTime = now;
+                }
+    };
+}
+        function handleThrottleInput() {
+            text2.innerHTML = input2.value;
+        }
+
+        
+
+        input2.addEventListener('input', throttle(handleThrottleInput, 2000));
+    </script>
+</body>
+</html>
