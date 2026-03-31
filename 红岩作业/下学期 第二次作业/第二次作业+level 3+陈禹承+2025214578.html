@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>level 3 自己尝试手写一个Promise</title>
+</head>
+<body>
+    <script>
+        // 自定义Promise
+class MyPromise{
+    constructor(executor){
+        this.status = 'pending';// 给promise对象指定status属性，初始值为pending
+        this.value = undefined;
+        this.reason = undefined;
+        this.onResolvedCallbacks = [];
+        this.onRejectedCallbacks = [];
+        let resolve = (value) => {
+            if(this.status === 'pending'){
+                this.status = 'resolved';
+                this.value = value;
+                this.onResolvedCallbacks.forEach(fn => fn());
+            }
+        }
+        let reject = (reason) => {
+            if(this.status === 'pending'){
+                this.status = 'rejected';
+                this.reason = reason;
+                this.onRejectedCallbacks.forEach(fn => fn());
+            }
+        }
+        try{
+            executor(resolve, reject);
+        }catch(e){
+            reject(e);
+        }
+    }
+    then(onResolved, onRejected){
+        onResolved = typeof onResolved === 'function' ? onResolved : value => value;
+        onRejected = typeof onRejected === 'function' ? onRejected : reason => { throw reason };
+        // 执行当前Promise的回调函数
+        if(this.status === 'fulfilled'){
+            onResolved(this.value);
+        }else if(this.status === 'rejected'){
+            onRejected(this.reason);
+        }else if(this.status === 'pending'){
+            this.onResolvedCallbacks.push(() => onResolved(this.value));
+            this.onRejectedCallbacks.push(() => onRejected(this.reason));
+        }
+    }
+};
+let p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('p1 success');
+    }, 1000);
+});
+let p2 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('p2 success');
+    }, 2000);
+});
+//Promise.all将多个Promise实例包装成一个新的Promise实例，并返回一个新的Promise实例
+// 当所有Promise实例都成功时，新的Promise实例才会成功，并将所有成功的结果作为参数传递给then方法（全成才成）
+// 如果任何一个Promise实例失败，新的Promise实例就会失败，并将第一个失败的结果作为参数传递给catch方法（一败全败）
+Promise.all([p1, p2]).then((results) => {
+    console.log(results);
+}).catch((error) => {
+    console.log(error);
+});
+    </script>
+</body>
+</html>
