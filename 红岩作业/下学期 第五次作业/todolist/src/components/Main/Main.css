@@ -1,0 +1,55 @@
+/* ============ Main 主体区域 ============ */
+.main {
+  padding: 24px 28px;
+}
+
+/* ---- 输入区域 ---- */
+.input-area {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.todo-input {
+  flex: 1;
+  height: 46px;
+  padding: 0 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #333;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.todo-input::placeholder {
+  color: #bbb;
+}
+
+.todo-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.add-btn {
+  height: 46px;
+  padding: 0 24px;
+  background: skyblue;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.add-btn:active {
+  transform: translateY(0);
+}

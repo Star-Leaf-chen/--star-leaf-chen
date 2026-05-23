@@ -1,0 +1,85 @@
+/* ---- 待办事项列表 ---- */
+.todo-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: #f8f9fc;
+  border-radius: 10px;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.todo-item:hover {
+  background: #eef0f7;
+  transform: translateX(2px);
+}
+
+.todo-item.completed {
+  background: #f0f2f5;
+}
+
+.checkbox {
+  font-size: 20px;
+  cursor: pointer;
+  margin-right: 12px;
+  user-select: none;
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.checkbox:hover {
+  transform: scale(1.15);
+}
+
+.todo-text {
+  flex: 1;
+  font-size: 15px;
+  color: #333;
+  word-break: break-word;
+  cursor: pointer;
+}
+
+.todo-item.completed .todo-text {
+  color: #bbb;
+  text-decoration: line-through;
+}
+
+/* 编辑输入框 */
+.edit-input {
+  flex: 1;
+  height: 32px;
+  padding: 0 10px;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #333;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.delete-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  color: #ff5c5c;
+  background: rgba(255, 92, 92, 0.1);
+}

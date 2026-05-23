@@ -1,0 +1,20 @@
+/* ============ Header 头部 ============ */
+.header {
+  background: skyblue;
+  padding: 32px 28px 28px;
+  text-align: center;
+  color: #fff;
+}
+
+.header-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+  font-weight: 400;
+}
